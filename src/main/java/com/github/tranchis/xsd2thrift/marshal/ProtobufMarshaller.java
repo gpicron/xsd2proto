@@ -137,7 +137,7 @@ public class ProtobufMarshaller implements IMarshaller {
 			}
 		}
 
-		return writeIndent() + sRequired + type + " " + name + " = "
+		return writeIndent() + sRequired + type + " " + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name) + " = "
 				+ order + ";\n";
 	}
 
