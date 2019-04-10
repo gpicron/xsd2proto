@@ -23,6 +23,8 @@
  */
 package com.github.tranchis.xsd2thrift.marshal;
 
+import com.google.common.base.CaseFormat;
+
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -105,7 +107,7 @@ public class ProtobufMarshaller implements IMarshaller {
 
 	@Override
 	public String writeEnumValue(int order, String value) {
-		return (writeIndent() + value + " = " + order + ";\n");
+		return (writeIndent() + CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, value) + " = " + order + ";\n");
 	}
 
 	@Override
