@@ -29,7 +29,6 @@ import java.util.TreeMap;
 
 import com.github.tranchis.xsd2thrift.marshal.IMarshaller;
 import com.github.tranchis.xsd2thrift.marshal.ProtobufMarshaller;
-import com.github.tranchis.xsd2thrift.marshal.ThriftMarshaller;
 
 public class Main {
 	private static boolean correct;
@@ -97,16 +96,7 @@ public class Main {
 
 			i = 0;
 			while (correct && i < args.length - 1) {
-				if (args[i].equals("--thrift")) {
-					if (im == null) {
-						im = new ThriftMarshaller();
-						xp.addMarshaller(im);
-						writer.setMarshaller(im);
-						writer.setDefaultExtension("thrift");
-					} else {
-						usage("Only one marshaller can be specified at a time.");
-					}
-				} else if (args[i].equals("--protobuf")) {
+				if (args[i].equals("--protobuf")) {
 					if (im == null) {
 						pbm = new ProtobufMarshaller();
 						im = pbm;

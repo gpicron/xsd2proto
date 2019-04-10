@@ -289,7 +289,7 @@ public class XSDParser implements ErrorHandler {
 							type.substring(0, qualifyingDot));
 					type = type.substring(qualifyingDot + 1);
 				}
-			} else if (!declared.contains(type) & !basicTypes.contains(type)
+			} else if (!basicTypes.contains(type)
 					&& f.getTypeNamespace() != null
 					&& !f.getTypeNamespace().equals(st.getNamespace())) {
 				typeNameSpace = f.getTypeNamespace() + ".";

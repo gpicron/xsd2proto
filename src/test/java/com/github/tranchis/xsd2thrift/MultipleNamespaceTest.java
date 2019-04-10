@@ -36,25 +36,6 @@ public class MultipleNamespaceTest {
             fail(e.toString());
         }
     }
-
-    @Test
-    public void shouldCreateANamespacedThriftPersonFile(){
-        compareExpectedAndGenerated(
-                "src/test/data/expected/schemas_com_domain_person.thrift",
-                "src/test/data/actual/schemas_com_domain_person.thrift");
-    }
-    @Test
-    public void shouldCreateANamespacedThriftCommonFile(){
-        compareExpectedAndGenerated(
-                "src/test/data/expected/schemas_com_domain_common.thrift",
-                "src/test/data/actual/schemas_com_domain_common.thrift");
-    }
-    @Test
-    public void shouldCreateANamespacedThriftAddressFile(){
-        compareExpectedAndGenerated(
-                "src/test/data/expected/schemas_com_domain_address.thrift",
-                "src/test/data/actual/schemas_com_domain_address.thrift");
-    }
     @Test
     public void shouldCreateANamespacedProtobufPersonFile(){
         compareExpectedAndGenerated(

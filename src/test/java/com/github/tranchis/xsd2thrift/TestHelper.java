@@ -33,16 +33,8 @@ public class TestHelper {
 		}
 	}
 
-	public static String generateThrift(String name, String mappings) {
-		return generate(name, "thrift", "thrift", mappings);
-	}
-
 	public static String generateProtobuf(String name, String mappings) {
 		return generate(name, "protobuf", "proto", mappings);
-	}
-
-	public static String generateThrift(String name) {
-		return generate(name, "thrift", "thrift", "a:a");
 	}
 
 	public static String generateProtobuf(String name) {
