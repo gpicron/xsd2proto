@@ -1,4 +1,4 @@
-# XSD2THRIFT 
+# XSD2THRIFT  [![CircleCI](https://circleci.com/gh/entur/xsd2thrift.svg?style=svg)](https://circleci.com/gh/entur/xsd2thrift)
 
 This tool allows for converting XML Schema files (.xsd) to Thrift (.thrift) and
 Protocol Buffers (.proto).
