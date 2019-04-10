@@ -32,14 +32,17 @@ xsd2thrift has been tested on Java SE 6.
 ## Usage
 
 ```bash
-java xsd2thrift-1.0.jar [--thrift] [--protobuf] [--output=FILENAME] [--package=NAME]
-                        [--nestEnums=true|false] [--splitBySchema=true|false] filename.xsd
-  --thrift                   : convert to Thrift
-  --protobuf                 : convert to Protocol Buffers
-  --filename=FILENAME        : store the result in FILENAME instead of standard output
-  --package=NAME             : set namespace/package of the output file
-  --nestEnums=true|false     : nest enum declaration within messages that reference them, only supported by protobuf, defaults to true
-  --splitBySchema=true|false : split output into namespace-specific files, defaults to false
+java xsd2thrift.jar [--thrift] [--protobuf] [--output=FILENAME]
+                           [--package=NAME] filename.xsd
+  --thrift                    : convert to Thrift
+  --protobuf                  : convert to Protocol Buffers
+  --filename=FILENAME         : store the result in FILENAME instead of standard output
+  --package=NAME              : set namespace/package of the output file
+  --nestEnums=true|false      : nest enum declaration within messages that reference them, only supported by protobuf, defaults to true
+  --splitBySchema=true|false  : split output into namespace-specific files, defaults to false
+  --customMappings=a:b,x:y    : represent schema types as specific output types
+  --protobufVersion=2|3       : if generating protobuf, choose the version (2 or 3)
+  --typeInEnums=true|false    : include type as a prefix in enums, defaults to true
 ```
 
 ## License
