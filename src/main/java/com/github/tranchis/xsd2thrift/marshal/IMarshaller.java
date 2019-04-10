@@ -50,4 +50,6 @@ public interface IMarshaller {
 	boolean isCircularDependencySupported();
 
 	void setCustomMappings(Map<String, String> customMappings);
+
+	String getImport(String typeName);
 }

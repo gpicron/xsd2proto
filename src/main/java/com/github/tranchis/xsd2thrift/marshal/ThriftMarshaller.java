@@ -194,4 +194,8 @@ public class ThriftMarshaller implements IMarshaller {
 		}
 	}
 
+	@Override
+	public String getImport(String typeName) {
+		return null;
+	}
 }

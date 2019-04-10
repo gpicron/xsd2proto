@@ -26,14 +26,7 @@ package com.github.tranchis.xsd2thrift;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -95,6 +88,7 @@ public class XSDParser implements ErrorHandler {
 
 		basicTypes = new TreeSet<String>();
 		basicTypes.add("string");
+		basicTypes.add("normalizedString");
 		basicTypes.add("anyType");
 		basicTypes.add("anyURI");
 		basicTypes.add("anySimpleType");
@@ -117,6 +111,8 @@ public class XSDParser implements ErrorHandler {
 		basicTypes.add("boolean");
 		basicTypes.add("date");
 		basicTypes.add("dateTime");
+		basicTypes.add("time");
+		basicTypes.add("duration");
 		basicTypes.add("decimal");
 		basicTypes.add("float");
 		basicTypes.add("double");
@@ -158,6 +154,8 @@ public class XSDParser implements ErrorHandler {
 		boolean bModified;
 
 		st = createSuperObject();
+
+		writeImports(st);
 
 		if (!marshaller.isNestedEnums() || !isNestEnums()) {
 			ite = enums.keySet().iterator();
@@ -229,6 +227,22 @@ public class XSDParser implements ErrorHandler {
 		}
 	}
 
+	private void writeImports(Struct st) throws IOException {
+		Set<String> requiredImports = new HashSet<String>();
+		for (Struct struct : map.values()) {
+			for (String type : struct.getTypes()) {
+				String requiredImport = marshaller.getImport(type);
+				if (requiredImport != null) {
+					requiredImports.add(requiredImport);
+				}
+			}
+		}
+
+		for (String requiredImport : requiredImports) {
+			os(st.getNamespace()).write(("import \"" + requiredImport + "\";\n").getBytes());
+		}
+	}
+
 	private void writeStruct(Struct st, Set<String> declared)
 			throws IOException {
 		Iterator<Field> itf;
@@ -275,7 +289,7 @@ public class XSDParser implements ErrorHandler {
 							type.substring(0, qualifyingDot));
 					type = type.substring(qualifyingDot + 1);
 				}
-			} else if (!basicTypes.contains(type)
+			} else if (!declared.contains(type) & !basicTypes.contains(type)
 					&& f.getTypeNamespace() != null
 					&& !f.getTypeNamespace().equals(st.getNamespace())) {
 				typeNameSpace = f.getTypeNamespace() + ".";

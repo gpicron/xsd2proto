@@ -26,11 +26,13 @@ package com.github.tranchis.xsd2thrift.marshal;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.HashMap;
 
 public class ProtobufMarshaller implements IMarshaller {
 	private TreeMap<String, String> typeMapping;
 	private String indent = "";
 	private int version = 2;
+	private HashMap<String, String> imports;
 
 	public ProtobufMarshaller() {
 		typeMapping = new TreeMap<String, String>();
@@ -56,6 +58,7 @@ public class ProtobufMarshaller implements IMarshaller {
 		typeMapping.put("anySimpleType", "UnspecifiedType");
 		typeMapping.put("anyType", "UnspecifiedType");
 		typeMapping.put("anyURI", "UnspecifiedType");
+		typeMapping.put("normalizedString", "string");
 		typeMapping.put("boolean", "bool");
 		typeMapping.put("binary", "bytes"); // UnspecifiedType.object is
 											// declared binary
@@ -66,6 +69,13 @@ public class ProtobufMarshaller implements IMarshaller {
 											// 1970
 		typeMapping.put("dateTime", "int64"); // Number of milliseconds since
 												// January 1st, 1970
+
+		typeMapping.put("time", "google.protobuf.Timestamp");
+		typeMapping.put("duration", "google.protobuf.Duration");
+
+		imports = new HashMap<String, String>();
+		imports.put("google.protobuf.Timestamp", "google/protobuf/timestamp.proto");
+		imports.put("google.protobuf.Duration", "google/protobuf/duration.proto");
 	}
 
 	@Override
@@ -76,6 +86,10 @@ public class ProtobufMarshaller implements IMarshaller {
 			res = "package " + namespace + ";\n\n";
 		} else {
 			res = "";
+		}
+
+		if (version == 3) {
+			res += "syntax = \"proto3\";\n\n";
 		}
 
 		return res;
@@ -199,5 +213,13 @@ public class ProtobufMarshaller implements IMarshaller {
 
 	public void setProtobufVersion(int version) {
 		 this.version = version;
+	}
+
+	@Override
+	public String getImport(String typeName) {
+		if (imports != null) {
+			return imports.get(getTypeMapping(typeName));
+		}
+		return null;
 	}
 }
