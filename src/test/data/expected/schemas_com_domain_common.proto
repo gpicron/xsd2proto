@@ -2,7 +2,7 @@ package schemas.com.domain.common;
 
 message UnspecifiedType
 {
-	required string baseObjectType = 1;
+	required string base_object_type = 1;
 	required bytes object = 2;
 }
 

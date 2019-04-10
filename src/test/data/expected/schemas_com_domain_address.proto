@@ -9,9 +9,9 @@ message addressLinesType
 
 message addressType
 {
-	required addressLinesType addressLines = 1;
+	required addressLinesType address_lines = 1;
 	required string city = 2;
 	required schemas.com.domain.common.country _country = 3;
-	required string postCode = 4;
+	required string post_code = 4;
 }
 

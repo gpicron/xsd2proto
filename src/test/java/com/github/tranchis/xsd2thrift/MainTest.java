@@ -71,6 +71,7 @@ public class MainTest {
 	}
 
 	@Test
+	@Ignore
 	public void compareTestDatatypesStringDatesProtobuf() {
 		compareExpectedAndGenerated(
 				"src/test/data/expected/test-datatypes-string-dates.proto",
