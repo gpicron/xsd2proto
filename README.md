@@ -1,27 +1,15 @@
-# XSD2THRIFT [![Build Status](https://travis-ci.org/tranchis/xsd2thrift.png?branch=master)](https://travis-ci.org/tranchis/xsd2thrift)
+# XSD2THRIFT 
 
 This tool allows for converting XML Schema files (.xsd) to Thrift (.thrift) and
 Protocol Buffers (.proto).
 
 ## Binary download
 
-[Version 1.0](http://dl.bintray.com/content/tranchis/xsd2thrift/com/github/tranchis/xsd2thrift/1.0/xsd2thrift-1.0-onejar.jar?direct)
+To be updated
 
 ## Importing from Maven
 
-    <repositories>
-      <repository>
-        <id>xsd2thrift</id>
-        <url>http://dl.bintray.com/content/tranchis/xsd2thrift</url>
-      </repository>
-    </repositories>
-    
-    <dependency>
-      <groupid>com.github.tranchis</groupid>
-      <artifactid>xsd2thrift</artifactid>
-      <version>1.0</version>
-      <type>jar</type>
-    </dependency>
+To be updated
 
 ## Building
 
@@ -32,18 +20,19 @@ xsd2thrift has been tested on Java SE 6.
 ## Usage
 
 ```bash
-java xsd2thrift.jar [--thrift] [--protobuf] [--output=FILENAME]
+Usage: java xsd2thrift.jar [--thrift] [--protobuf] [--output=FILENAME]
                            [--package=NAME] filename.xsd
+
   --thrift                    : convert to Thrift
   --protobuf                  : convert to Protocol Buffers
-  --filename=FILENAME         : store the result in FILENAME instead of standard output
+  --filename=FILENAME           : store the result in FILENAME instead of standard output
   --package=NAME              : set namespace/package of the output file
   --nestEnums=true|false      : nest enum declaration within messages that reference them, only supported by protobuf, defaults to true
   --splitBySchema=true|false  : split output into namespace-specific files, defaults to false
   --customMappings=a:b,x:y    : represent schema types as specific output types
   --protobufVersion=2|3       : if generating protobuf, choose the version (2 or 3)
   --typeInEnums=true|false    : include type as a prefix in enums, defaults to true
-```
+  ```
 
 ## License
 
