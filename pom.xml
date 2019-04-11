@@ -30,13 +30,6 @@
       <artifactId>guava</artifactId>
       <version>27.1-jre</version>
     </dependency>
-    <!--
-    <dependency>
-      <groupId>activesoap</groupId>
-      <artifactId>relaxngDatatype</artifactId>
-      <version>1.5</version>
-    </dependency>
-    //-->
 
   </dependencies>
 
@@ -47,10 +40,10 @@
       <plugin>
 	<groupId>org.apache.maven.plugins</groupId>
 	<artifactId>maven-compiler-plugin</artifactId>
-	<version>2.0.2</version>
+	<version>3.8.0</version>
 	<configuration>
-	  <source>1.6</source>
-	  <target>1.6</target>
+	  <source>1.8</source>
+	  <target>1.8</target>
 	</configuration>
       </plugin>
 
@@ -81,68 +74,14 @@
     </plugins>
   </build>
 
-  <repositories>
+  <distributionManagement>
+    <snapshotRepository>
+      <id>snapshot</id>
+      <name>entur2-snapshots</name>
+      <url>https://entur2.jfrog.io/entur2/libs-snapshot-local</url>
+    </snapshotRepository>
+  </distributionManagement>
 
-    <repository>
-      <id>google-maven-repository</id>
-      <name>Google Maven Repository</name>
-      <url>http://google-maven-repository.googlecode.com/svn/repository/</url>
-      <releases>
-	<enabled>true</enabled>
-      </releases>
-      <snapshots>
-	<enabled>false</enabled>
-      </snapshots>
-    </repository>
-
-    <repository>
-      <id>itm-maven-repository-releases</id>
-      <url>http://www.itm.uni-luebeck.de/projects/maven/releases/</url>
-      <releases>
-	<enabled>true</enabled>
-      </releases>
-      <snapshots>
-	<enabled>false</enabled>
-      </snapshots>
-    </repository>
-
-    <repository>
-      <id>itm-maven-repository-snapshots</id>
-      <url>http://www.itm.uni-luebeck.de/projects/maven/snapshots/</url>
-      <releases>
-	<enabled>false</enabled>
-      </releases>
-      <snapshots>
-	<enabled>true</enabled>
-      </snapshots>
-    </repository>
-
-    <repository>
-      <id>repository.jboss.org</id>
-      <url>http://repository.jboss.org/nexus/content/groups/public/</url>
-      <snapshots>
-	<enabled>false</enabled>
-      </snapshots>
-    </repository>
-
-    <repository>
-      <id>maven2-repository.dev.java.net</id>
-      <name>Java.net Repository for Maven 2</name>
-      <url>http://download.java.net/maven/2/</url>
-    </repository>
-
-  </repositories>
-
-  <pluginRepositories>
-    <pluginRepository>
-      <id>onejar-maven-plugin.googlecode.com</id>
-      <url>http://onejar-maven-plugin.googlecode.com/svn/mavenrepo</url>
-    </pluginRepository>
-    <pluginRepository>
-      <id>onejar-maven-plugin-itm-patch</id>
-      <url>http://www.itm.uni-luebeck.de/projects/maven/releases/</url>
-    </pluginRepository>
-  </pluginRepositories>
 
 </project>
 
