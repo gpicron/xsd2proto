@@ -39,7 +39,7 @@ public interface IMarshaller {
 	String writeStructHeader(String name);
 
 	String writeStructParameter(int order, boolean required, boolean repeated,
-			String name, String type);
+			String name, String type, String fieldDocumentation);
 
 	String writeStructFooter();
 

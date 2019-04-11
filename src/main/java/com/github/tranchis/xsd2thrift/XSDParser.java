@@ -23,37 +23,27 @@
  */
 package com.github.tranchis.xsd2thrift;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.*;
-
+import com.github.tranchis.xsd2thrift.marshal.IMarshaller;
+import com.sun.xml.xsom.*;
+import com.sun.xml.xsom.parser.XSOMParser;
+import com.sun.xml.xsom.util.DomAnnotationParserFactory;
+import org.w3c.dom.Node;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import com.github.tranchis.xsd2thrift.marshal.IMarshaller;
-import com.sun.xml.xsom.XSAttGroupDecl;
-import com.sun.xml.xsom.XSAttributeDecl;
-import com.sun.xml.xsom.XSAttributeUse;
-import com.sun.xml.xsom.XSComplexType;
-import com.sun.xml.xsom.XSElementDecl;
-import com.sun.xml.xsom.XSFacet;
-import com.sun.xml.xsom.XSModelGroup;
-import com.sun.xml.xsom.XSParticle;
-import com.sun.xml.xsom.XSRestrictionSimpleType;
-import com.sun.xml.xsom.XSSchema;
-import com.sun.xml.xsom.XSSchemaSet;
-import com.sun.xml.xsom.XSSimpleType;
-import com.sun.xml.xsom.XSTerm;
-import com.sun.xml.xsom.XSType;
-import com.sun.xml.xsom.parser.XSOMParser;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.*;
 
 public class XSDParser implements ErrorHandler {
 	private File f;
 	private Map<String, Struct> map;
 	private Map<String, Enumeration> enums;
 	private Map<String, String> simpleTypes;
+	private Map<String, String> documentation;
 	private Set<String> keywords, basicTypes;
 	private TreeMap<String, String> xsdMapping;
 	private IMarshaller marshaller;
@@ -61,6 +51,7 @@ public class XSDParser implements ErrorHandler {
 	private boolean nestEnums = true;
 	private int enumOrderStart = 1;
 	private boolean typeInEnums = true;
+	private boolean includeDocs = false;
 
 	public XSDParser(String stFile) {
 		this.xsdMapping = new TreeMap<String, String>();
@@ -73,6 +64,7 @@ public class XSDParser implements ErrorHandler {
 		map = new TreeMap<String, Struct>();
 		enums = new TreeMap<String, Enumeration>();
 		simpleTypes = new TreeMap<String, String>();
+		documentation = new TreeMap<String, String>();
 		keywords = new TreeSet<String>();
 		keywords.add("interface");
 		keywords.add("is");
@@ -133,10 +125,12 @@ public class XSDParser implements ErrorHandler {
 	}
 
 	public void parse() throws Exception {
-		XSOMParser parser;
 
-		parser = new XSOMParser();
+		XSOMParser parser = new XSOMParser(SAXParserFactory.newInstance());
 		parser.setErrorHandler(this);
+
+		parser.setAnnotationParser(new DomAnnotationParserFactory());
+
 		parser.parse(f);
 
 		interpretResult(parser.getResult());
@@ -251,6 +245,8 @@ public class XSDParser implements ErrorHandler {
 		Set<String> usedInEnums;
 		int order;
 
+		writeMessageDocumentation(st.getName(), st.getNamespace());
+
 		os(st.getNamespace()).write(
 				marshaller.writeStructHeader(escape(st.getName())).getBytes());
 		itf = orderedIteratorForFields(st.getFields());
@@ -300,11 +296,34 @@ public class XSDParser implements ErrorHandler {
 
 			os(st.getNamespace()).write(
 					marshaller.writeStructParameter(order, f.isRequired(),
-							f.isRepeat(), escape(fname), type).getBytes());
+							f.isRepeat(), escape(fname), type, getFieldDocumentation(type)).getBytes());
 			order = order + 1;
 		}
 		os(st.getNamespace()).write(marshaller.writeStructFooter().getBytes());
 		declared.add(st.getName());
+	}
+
+	private void writeMessageDocumentation(String name, String namespace) throws IOException {
+		if (includeDocs & documentation.containsKey(name)) {
+			StringBuilder sb = new StringBuilder();
+			sb.append("\n/*\n");
+			// Handling possible multiline-comments
+			sb.append(" * ");
+			sb.append(documentation.get(name).replaceAll("\n", "\n * "));
+			sb.append("\n */\n");
+
+			os(namespace).write(sb.toString().getBytes());
+		}
+	}
+
+	private String getFieldDocumentation(String name) {
+		if (includeDocs & documentation.containsKey(name)) {
+
+			String s = documentation.get(name);
+			// Handling possible multiline-comments
+			return s.replaceAll("\n", " ");
+		}
+		return null;
 	}
 
 	private Iterator<Field> orderedIteratorForFields(List<Field> fields) {
@@ -328,6 +347,9 @@ public class XSDParser implements ErrorHandler {
 		Iterator<String> itg;
 		en = enums.get(type);
 		enumValue = escape(en.getName());
+
+		writeMessageDocumentation(type, en.getNamespace());
+
 		os(en.getNamespace()).write(
 				marshaller.writeEnumHeader(enumValue).getBytes());
 		itg = en.iterator();
@@ -481,8 +503,16 @@ public class XSDParser implements ErrorHandler {
 				}
 			}
 			simpleTypes.put(typeName, xs != null ? xs.getName() : "string");
+			String doc = resolveDocumentationAnnotation(xs);
+			addDocumentation(typeName, doc);
 		}
 		return typeName;
+	}
+
+	private void addDocumentation(String typeName, String doc) {
+		if (doc != null) {
+			documentation.put(typeName, doc);
+		}
 	}
 
 	/**
@@ -500,11 +530,15 @@ public class XSDParser implements ErrorHandler {
 			typeName = elementName != null ? elementName + "Type"
 					: generateAnonymousName();
 		}
+		String doc = resolveDocumentationAnnotation(cType);
+
 		st = map.get(typeName);
 		if (st == null) {
 			st = new Struct(typeName,
 					NamespaceConverter.convertFromSchema(nameSpace));
 			map.put(typeName, st);
+
+			addDocumentation(typeName, doc);
 
 			parent = cType;
 			while (parent != sset.getAnyType()) {
@@ -518,6 +552,22 @@ public class XSDParser implements ErrorHandler {
 			st.setParent(cType.getBaseType().getName());
 		}
 		return typeName;
+	}
+
+	private String resolveDocumentationAnnotation(XSType cType) {
+		String doc = null;
+		if (cType.getAnnotation() != null && cType.getAnnotation().getAnnotation() != null) {
+			if (cType.getAnnotation().getAnnotation() instanceof Node){
+				Node annotationEl = (Node) cType.getAnnotation().getAnnotation();
+				Node documentationChild = annotationEl.getFirstChild();
+				if (documentationChild != null && documentationChild.getNextSibling() != null &&
+						documentationChild.getNextSibling().getFirstChild() != null) {
+					doc = documentationChild.getNextSibling().getFirstChild().getNodeValue();
+				}
+
+			}
+		}
+		return doc;
 	}
 
 	private int anonymousCounter = 0;
@@ -586,6 +636,8 @@ public class XSDParser implements ErrorHandler {
 				en.addString(it.next().getValue().value);
 			}
 			enums.put(name, en);
+			String doc = resolveDocumentationAnnotation(type);
+			addDocumentation(name, doc);
 		}
 	}
 
@@ -756,5 +808,9 @@ public class XSDParser implements ErrorHandler {
 
 	public void setTypeInEnums(boolean typeInEnums) {
 		this.typeInEnums = typeInEnums;
+	}
+
+	public void setIncludeDocs(boolean includeDocs) {
+		this.includeDocs = includeDocs;
 	}
 }

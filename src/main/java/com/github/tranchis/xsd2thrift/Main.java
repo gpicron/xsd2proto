@@ -45,6 +45,7 @@ public class Main {
 			+ "  --customMappings=a:b,x:y    : represent schema types as specific output types\n"
 			+ "  --protobufVersion=2|3       : if generating protobuf, choose the version (2 or 3)\n"
 			+ "  --typeInEnums=true|false    : include type as a prefix in enums, defaults to true\n"
+			+ "  --includeDocs=true|false    : include type as a prefix in enums, defaults to false\n"
 			+ "";
 
 	private static void usage(String error) {
@@ -144,6 +145,8 @@ public class Main {
 					}
 				} else if (args[i].startsWith("--typeInEnums=")) {
 					xp.setTypeInEnums(Boolean.parseBoolean(args[i].split("=")[1]));
+				}  else if (args[i].startsWith("--includeDocs=")) {
+					xp.setIncludeDocs(Boolean.parseBoolean(args[i].split("=")[1]));
 				} else {
 					usage();
 				}

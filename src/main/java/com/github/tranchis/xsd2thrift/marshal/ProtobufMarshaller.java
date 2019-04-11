@@ -125,7 +125,7 @@ public class ProtobufMarshaller implements IMarshaller {
 
 	@Override
 	public String writeStructParameter(int order, boolean required,
-			boolean repeated, String name, String type) {
+			boolean repeated, String name, String type, String fieldDocumentation) {
 		String sRequired = "";
 
 		// Only versions prior to 3 have required/optional
@@ -138,7 +138,7 @@ public class ProtobufMarshaller implements IMarshaller {
 		}
 
 		return writeIndent() + sRequired + type + " " + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name) + " = "
-				+ order + ";\n";
+				+ order + ";" + (fieldDocumentation != null ? " // "+fieldDocumentation:"") + "\n";
 	}
 
 	private String getRequired(boolean required, boolean repeated) {
