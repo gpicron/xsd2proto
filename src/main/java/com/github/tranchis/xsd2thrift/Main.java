@@ -33,19 +33,19 @@ import com.github.tranchis.xsd2thrift.marshal.ProtobufMarshaller;
 public class Main {
 	private static boolean correct;
 	private static String usage = ""
-			+ "Usage: java xsd2thrift.jar [--thrift] [--protobuf] [--output=FILENAME]\n"
+			+ "Usage: java xsd2thrift.jar [--protobuf] [--output=FILENAME]\n"
 			+ "                           [--package=NAME] filename.xsd\n"
 			+ "\n"
-			+ "  --thrift                    : convert to Thrift\n"
-			+ "  --protobuf                  : convert to Protocol Buffers\n"
-			+ "  --filename=FILENAME           : store the result in FILENAME instead of standard output\n"
-			+ "  --package=NAME              : set namespace/package of the output file\n"
-			+ "  --nestEnums=true|false      : nest enum declaration within messages that reference them, only supported by protobuf, defaults to true\n"
-			+ "  --splitBySchema=true|false  : split output into namespace-specific files, defaults to false\n"
-			+ "  --customMappings=a:b,x:y    : represent schema types as specific output types\n"
-			+ "  --protobufVersion=2|3       : if generating protobuf, choose the version (2 or 3)\n"
-			+ "  --typeInEnums=true|false    : include type as a prefix in enums, defaults to true\n"
-			+ "  --includeDocs=true|false    : include type as a prefix in enums, defaults to false\n"
+			+ "  --protobuf                      : convert to Protocol Buffers\n"
+			+ "  --filename=FILENAME             : store the result in FILENAME instead of standard output\n"
+			+ "  --package=NAME                  : set namespace/package of the output file\n"
+			+ "  --nestEnums=true|false          : nest enum declaration within messages that reference them, only supported by protobuf, defaults to true\n"
+			+ "  --splitBySchema=true|false      : split output into namespace-specific files, defaults to false\n"
+			+ "  --customMappings=a:b,x:y        : represent schema types as specific output types\n"
+			+ "  --protobufVersion=2|3           : if generating protobuf, choose the version (2 or 3)\n"
+			+ "  --typeInEnums=true|false        : include type as a prefix in enums, defaults to true\n"
+			+ "  --includeMessageDocs=true|false : include documentation of messages in output, defaults to true\n"
+			+ "  --includeFieldDocs=true|false   : include documentation for fields in output, defaults to true\n"
 			+ "";
 
 	private static void usage(String error) {
@@ -145,8 +145,10 @@ public class Main {
 					}
 				} else if (args[i].startsWith("--typeInEnums=")) {
 					xp.setTypeInEnums(Boolean.parseBoolean(args[i].split("=")[1]));
-				}  else if (args[i].startsWith("--includeDocs=")) {
-					xp.setIncludeDocs(Boolean.parseBoolean(args[i].split("=")[1]));
+				} else if (args[i].startsWith("--includeMessageDocs=")) {
+					xp.setIncludeMessageDocs(Boolean.parseBoolean(args[i].split("=")[1]));
+				}  else if (args[i].startsWith("--includeFieldDocs=")) {
+					xp.setIncludeFieldDocs(Boolean.parseBoolean(args[i].split("=")[1]));
 				} else {
 					usage();
 				}
