@@ -1,0 +1,13 @@
+marshaller: protobuf
+protobufVersion: 3
+filename: generated-file.proto
+directory:
+namespace:
+splitBySchema: false
+nestEnums: false
+typeInEnums: true
+includeMessageDocs: true
+includeFieldDocs: true
+customMappings:
+  - a:b
+  - x:y

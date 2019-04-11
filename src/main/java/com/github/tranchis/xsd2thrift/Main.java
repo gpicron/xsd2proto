@@ -23,18 +23,25 @@
  */
 package com.github.tranchis.xsd2thrift;
 
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
 import com.github.tranchis.xsd2thrift.marshal.IMarshaller;
 import com.github.tranchis.xsd2thrift.marshal.ProtobufMarshaller;
+import org.yaml.snakeyaml.Yaml;
 
 public class Main {
 	private static boolean correct;
 	private static String usage = ""
 			+ "Usage: java xsd2thrift.jar [--protobuf] [--output=FILENAME]\n"
 			+ "                           [--package=NAME] filename.xsd\n"
+			+ "\n"
+			+ "  --configFile=FILENAME           : path to configuration file\n"
+			+ "\nOR\n"
 			+ "\n"
 			+ "  --protobuf                      : convert to Protocol Buffers\n"
 			+ "  --filename=FILENAME             : store the result in FILENAME instead of standard output\n"
@@ -95,65 +102,95 @@ public class Main {
 
 			Map<String, String> customMappings = null;
 
-			i = 0;
-			while (correct && i < args.length - 1) {
-				if (args[i].equals("--protobuf")) {
-					if (im == null) {
+			if (args.length == 2 && args[0].startsWith("--configFile=")) {
+				Yaml yaml = new Yaml();
+				try (InputStream in = Files.newInputStream(Paths.get(args[0].split("=")[1]))) {
+					ConfigFile config = yaml.loadAs(in, ConfigFile.class);
+
+					if (config.marshaller.equals("protobuf")) {
 						pbm = new ProtobufMarshaller();
 						im = pbm;
 						xp.addMarshaller(im);
 						writer.setMarshaller(im);
 						writer.setDefaultExtension("proto");
-						pbm.setProtobufVersion(protobufVersion);
-					} else {
-						usage("Only one marshaller can be specified at a time.");
+						pbm.setProtobufVersion(config.protobufVersion);
 					}
-				} else if (args[i].startsWith("--filename=")) {
-					param = args[i].split("=")[1];
-					writer.setFilename(param);
-				} else if (args[i].startsWith("--directory=")) {
-					param = args[i].split("=")[1];
-					writer.setDirectory(param);
-				} else if (args[i].startsWith("--package=")) {
-					param = args[i].split("=")[1];
-					writer.setDefaultNamespace(param);
-				} else if (args[i].startsWith("--splitBySchema=")) {
-					param = args[i].split("=")[1];
-					writer.setSplitBySchema("true".equals(param));
-				} else if (args[i].startsWith("--customMappings=")) {
-					param = args[i].split("=")[1];
-					customMappings = new HashMap<String, String>();
-					for (String mapping : param.split(",")) {
-						int colon = mapping.indexOf(':');
-						if (colon > -1) {
-							customMappings.put(mapping.substring(0, colon),
-									mapping.substring(colon + 1));
-						} else {
-							usage(mapping
-									+ " is not a valid custom mapping - use schematype:outputtype");
-						}
-					}
-				} else if (args[i].startsWith("--nestEnums=")) {
-					param = args[i].split("=")[1];
-					boolean nestEnums = Boolean.valueOf(param);
-					xp.setNestEnums(nestEnums);
-				} else if (args[i].startsWith("--protobufVersion=")) {
-					protobufVersion = Integer.parseInt(args[i].split("=")[1]);
-					xp.setEnumOrderStart(0);
-					if (pbm != null) {
-						pbm.setProtobufVersion(protobufVersion);
-					}
-				} else if (args[i].startsWith("--typeInEnums=")) {
-					xp.setTypeInEnums(Boolean.parseBoolean(args[i].split("=")[1]));
-				} else if (args[i].startsWith("--includeMessageDocs=")) {
-					xp.setIncludeMessageDocs(Boolean.parseBoolean(args[i].split("=")[1]));
-				}  else if (args[i].startsWith("--includeFieldDocs=")) {
-					xp.setIncludeFieldDocs(Boolean.parseBoolean(args[i].split("=")[1]));
-				} else {
-					usage();
-				}
 
-				i = i + 1;
+					writer.setFilename(config.filename);
+					writer.setDirectory(config.directory);
+					writer.setDefaultNamespace(config.namespace);
+					writer.setSplitBySchema(config.splitBySchema);
+
+					customMappings = new HashMap<>();
+					customMappings.putAll(config.customMappingsMap);
+
+					xp.setNestEnums(config.nestEnums);
+					xp.setEnumOrderStart(0);
+					xp.setTypeInEnums(config.typeInEnums);
+					xp.setIncludeMessageDocs(config.includeMessageDocs);
+					xp.setIncludeFieldDocs(config.includeFieldDocs);
+				}
+			} else {
+				i = 0;
+				while (correct && i < args.length - 1) {
+					if (args[i].equals("--protobuf")) {
+						if (im == null) {
+							pbm = new ProtobufMarshaller();
+							im = pbm;
+							xp.addMarshaller(im);
+							writer.setMarshaller(im);
+							writer.setDefaultExtension("proto");
+							pbm.setProtobufVersion(protobufVersion);
+						} else {
+							usage("Only one marshaller can be specified at a time.");
+						}
+					} else if (args[i].startsWith("--filename=")) {
+						param = args[i].split("=")[1];
+						writer.setFilename(param);
+					} else if (args[i].startsWith("--directory=")) {
+						param = args[i].split("=")[1];
+						writer.setDirectory(param);
+					} else if (args[i].startsWith("--package=")) {
+						param = args[i].split("=")[1];
+						writer.setDefaultNamespace(param);
+					} else if (args[i].startsWith("--splitBySchema=")) {
+						param = args[i].split("=")[1];
+						writer.setSplitBySchema("true".equals(param));
+					} else if (args[i].startsWith("--customMappings=")) {
+						param = args[i].split("=")[1];
+						customMappings = new HashMap<String, String>();
+						for (String mapping : param.split(",")) {
+							int colon = mapping.indexOf(':');
+							if (colon > -1) {
+								customMappings.put(mapping.substring(0, colon),
+										mapping.substring(colon + 1));
+							} else {
+								usage(mapping
+										+ " is not a valid custom mapping - use schematype:outputtype");
+							}
+						}
+					} else if (args[i].startsWith("--nestEnums=")) {
+						param = args[i].split("=")[1];
+						boolean nestEnums = Boolean.valueOf(param);
+						xp.setNestEnums(nestEnums);
+					} else if (args[i].startsWith("--protobufVersion=")) {
+						protobufVersion = Integer.parseInt(args[i].split("=")[1]);
+						xp.setEnumOrderStart(0);
+						if (pbm != null) {
+							pbm.setProtobufVersion(protobufVersion);
+						}
+					} else if (args[i].startsWith("--typeInEnums=")) {
+						xp.setTypeInEnums(Boolean.parseBoolean(args[i].split("=")[1]));
+					} else if (args[i].startsWith("--includeMessageDocs=")) {
+						xp.setIncludeMessageDocs(Boolean.parseBoolean(args[i].split("=")[1]));
+					} else if (args[i].startsWith("--includeFieldDocs=")) {
+						xp.setIncludeFieldDocs(Boolean.parseBoolean(args[i].split("=")[1]));
+					} else {
+						usage();
+					}
+
+					i = i + 1;
+				}
 			}
 
 			if (im == null) {
