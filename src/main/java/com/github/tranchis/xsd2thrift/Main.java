@@ -37,13 +37,12 @@ import org.yaml.snakeyaml.Yaml;
 public class Main {
 	private static boolean correct;
 	private static String usage = ""
-			+ "Usage: java xsd2thrift.jar [--protobuf] [--output=FILENAME]\n"
+			+ "Usage: java xsd2proto.jar [--output=FILENAME]\n"
 			+ "                           [--package=NAME] filename.xsd\n"
 			+ "\n"
 			+ "  --configFile=FILENAME           : path to configuration file\n"
 			+ "\nOR\n"
 			+ "\n"
-			+ "  --protobuf                      : convert to Protocol Buffers\n"
 			+ "  --filename=FILENAME             : store the result in FILENAME instead of standard output\n"
 			+ "  --package=NAME                  : set namespace/package of the output file\n"
 			+ "  --nestEnums=true|false          : nest enum declaration within messages that reference them, only supported by protobuf, defaults to true\n"
@@ -100,6 +99,13 @@ public class Main {
 			writer = new OutputWriter();
 			xp.setWriter(writer);
 
+
+			pbm = new ProtobufMarshaller();
+			im = pbm;
+			xp.addMarshaller(im);
+			writer.setMarshaller(im);
+			writer.setDefaultExtension("proto");
+
 			Map<String, String> customMappings = null;
 
 			if (args.length == 2 && args[0].startsWith("--configFile=")) {
@@ -107,14 +113,7 @@ public class Main {
 				try (InputStream in = Files.newInputStream(Paths.get(args[0].split("=")[1]))) {
 					ConfigFile config = yaml.loadAs(in, ConfigFile.class);
 
-					if (config.marshaller.equals("protobuf")) {
-						pbm = new ProtobufMarshaller();
-						im = pbm;
-						xp.addMarshaller(im);
-						writer.setMarshaller(im);
-						writer.setDefaultExtension("proto");
-						pbm.setProtobufVersion(config.protobufVersion);
-					}
+					pbm.setProtobufVersion(config.protobufVersion);
 
 					writer.setFilename(config.filename);
 					writer.setDirectory(config.directory);
@@ -133,18 +132,7 @@ public class Main {
 			} else {
 				i = 0;
 				while (correct && i < args.length - 1) {
-					if (args[i].equals("--protobuf")) {
-						if (im == null) {
-							pbm = new ProtobufMarshaller();
-							im = pbm;
-							xp.addMarshaller(im);
-							writer.setMarshaller(im);
-							writer.setDefaultExtension("proto");
-							pbm.setProtobufVersion(protobufVersion);
-						} else {
-							usage("Only one marshaller can be specified at a time.");
-						}
-					} else if (args[i].startsWith("--filename=")) {
+					if (args[i].startsWith("--filename=")) {
 						param = args[i].split("=")[1];
 						writer.setFilename(param);
 					} else if (args[i].startsWith("--directory=")) {
@@ -176,9 +164,8 @@ public class Main {
 					} else if (args[i].startsWith("--protobufVersion=")) {
 						protobufVersion = Integer.parseInt(args[i].split("=")[1]);
 						xp.setEnumOrderStart(0);
-						if (pbm != null) {
-							pbm.setProtobufVersion(protobufVersion);
-						}
+						pbm.setProtobufVersion(protobufVersion);
+						
 					} else if (args[i].startsWith("--typeInEnums=")) {
 						xp.setTypeInEnums(Boolean.parseBoolean(args[i].split("=")[1]));
 					} else if (args[i].startsWith("--includeMessageDocs=")) {
@@ -193,9 +180,8 @@ public class Main {
 				}
 			}
 
-			if (im == null) {
-				usage("A marshaller has to be specified.");
-			} else if (customMappings != null) {
+			
+			 if (customMappings != null) {
 				im.setCustomMappings(customMappings);
 			}
 

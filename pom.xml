@@ -1,91 +1,93 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 			     http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-  <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-  <name>xsd2thrift</name>
-  <groupId>com.github.tranchis</groupId>
-  <artifactId>xsd2thrift</artifactId>
+	<name>xsd2thrift</name>
+	<groupId>com.github.tranchis</groupId>
+	<artifactId>xsd2thrift</artifactId>
 
-  <packaging>jar</packaging>
-  <version>1.0</version>
+	<packaging>jar</packaging>
+	<version>1.0</version>
 
-  <dependencies>
+	<dependencies>
 
-    <dependency>
-      <groupId>com.sun.xsom</groupId>
-      <artifactId>xsom</artifactId>
-      <version>20140925</version>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.10</version>
+		<dependency>
+			<groupId>com.sun.xsom</groupId>
+			<artifactId>xsom</artifactId>
+			<version>20140925</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.10</version>
 			<scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>27.1-jre</version>
-    </dependency>
-    <dependency>
-      <groupId>org.yaml</groupId>
-      <artifactId>snakeyaml</artifactId>
-      <version>1.23</version>
-    </dependency>
-  </dependencies>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>27.1-jre</version>
+		</dependency>
+		<dependency>
+			<groupId>org.yaml</groupId>
+			<artifactId>snakeyaml</artifactId>
+			<version>1.23</version>
+		</dependency>
+	</dependencies>
 
 
-  <build>
-    <plugins>
+	<build>
+		<plugins>
 
-      <plugin>
-	<groupId>org.apache.maven.plugins</groupId>
-	<artifactId>maven-compiler-plugin</artifactId>
-	<version>3.8.0</version>
-	<configuration>
-	  <source>1.8</source>
-	  <target>1.8</target>
-	</configuration>
-      </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.0</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
 
-       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>2.4.3</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <manifestEntries>
-                    <Main-Class>com.github.tranchis.xsd2thrift.Main</Main-Class>
-                    <Build-Number>123</Build-Number>
-                  </manifestEntries>
-                </transformer>
-              </transformers>
-            </configuration>
-          </execution>
-        </executions>
-       </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.2.1</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<transformers>
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<manifestEntries>
+										<Main-Class>com.github.tranchis.xsd2thrift.Main</Main-Class>
 
-    </plugins>
-  </build>
+									</manifestEntries>
+								</transformer>
+							</transformers>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 
-  <distributionManagement>
-    <snapshotRepository>
-      <id>snapshot</id>
-      <name>entur2-snapshots</name>
-      <url>https://entur2.jfrog.io/entur2/libs-snapshot-local</url>
-    </snapshotRepository>
-  </distributionManagement>
+		</plugins>
+	</build>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>snapshot</id>
+			<name>entur2-snapshots</name>
+			<url>https://entur2.jfrog.io/entur2/libs-snapshot-local</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 
 </project>

@@ -48,7 +48,7 @@ public class TestHelper {
 			dir.mkdir();
 		String filename = "target/generated-proto/" + name + "." + extension;
 		try {
-			Main.main(new String[] { "--" + type, "--filename=" + filename,
+			Main.main(new String[] {  "--filename=" + filename,
 					"--package=default", "--customMappings=" + mappings,
 					"src/test/resources/xsd/" + name + ".xsd" });
 		} catch (Exception e) {

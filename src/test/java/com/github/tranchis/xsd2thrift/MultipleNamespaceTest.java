@@ -10,22 +10,13 @@ import static com.github.tranchis.xsd2thrift.TestHelper.*;
 
 public class MultipleNamespaceTest {
     
-    /*
-     * For regeneration of expected data
-     * public static void main(String args[]){
-        try {
-            //Main.main(new String[]{"--protobuf","--splitBySchema=true","--directory=src/test/resources/expectedproto/","--package=schemas.com.domain.common","contrib/ns-person.xsd"});
-            //Main.main(new String[]{"--thrift","--splitBySchema=true","--directory=src/test/resources/expectedproto/","--package=schemas.com.domain.common","contrib/ns-person.xsd"});
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }*/
+ 
 
     @BeforeClass
     public static void generateProtobufForTests(){
         try {
         	new File("target/generated-proto").mkdirs();
-        	Main.main(new String[]{"--protobuf","--splitBySchema=true","--directory=target/generated-proto/","--package=schemas.com.domain.common","src/test/resources/xsd/ns-person.xsd"});
+        	Main.main(new String[]{"--splitBySchema=true","--directory=target/generated-proto/","--package=schemas.com.domain.common","src/test/resources/xsd/ns-person.xsd"});
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.toString());

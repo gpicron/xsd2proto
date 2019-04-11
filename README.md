@@ -1,6 +1,7 @@
-# XSD2THRIFT  [![CircleCI](https://circleci.com/gh/entur/xsd2thrift.svg?style=svg)](https://circleci.com/gh/entur/xsd2thrift)
+# XSD2PROTO  [![CircleCI](https://circleci.com/gh/entur/xsd2thrift.svg?style=svg)](https://circleci.com/gh/entur/xsd2thrift)
 
-This tool allows for converting XML Schema files (.xsd) to Protocol Buffers (.proto).
+This tool allows for converting XML Schema files (.xsd) to Protocol Buffers (.proto). It is based on xsd2thrift, but since Thrift support has been 
+removed and protobuf retained the name has changed
 
 ## Binary download
 
@@ -12,17 +13,15 @@ To be updated
 
 ## Building
 
-To build xsd2thrift, you need Maven (http://maven.apache.org/) installed. To build xsd2thrift, run `mvn install`.
+To build xsd2proto, you need Maven (http://maven.apache.org/) installed. To build xsd2proto, run `mvn clean package`.
 
-xsd2thrift has been tested on JDK 8.
 
 ## Usage
 
 ```bash
-Usage: java xsd2thrift.jar [--protobuf] [--output=FILENAME]
+Usage: java xsd2proto.jar [--output=FILENAME]
                                   [--package=NAME] filename.xsd
        
-     --protobuf                      : convert to Protocol Buffers
      --filename=FILENAME             : store the result in FILENAME instead of standard output
      --package=NAME                  : set namespace/package of the output file
      --nestEnums=true|false          : nest enum declaration within messages that reference them, only supported by protobuf, defaults to true
