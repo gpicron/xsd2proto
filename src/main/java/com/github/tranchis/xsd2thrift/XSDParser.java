@@ -51,7 +51,7 @@ public class XSDParser implements ErrorHandler {
 	private boolean nestEnums = true;
 	private int enumOrderStart = 1;
 	private boolean typeInEnums = true;
-	private boolean includeDocs = false;
+	private boolean includeDocs = true;
 
 	public XSDParser(String stFile) {
 		this.xsdMapping = new TreeMap<String, String>();
@@ -309,7 +309,7 @@ public class XSDParser implements ErrorHandler {
 			sb.append("\n/*\n");
 			// Handling possible multiline-comments
 			sb.append(" * ");
-			sb.append(documentation.get(name).replaceAll("\n", "\n * "));
+			sb.append(documentation.get(name).trim().replaceAll("\n", "\n * "));
 			sb.append("\n */\n");
 
 			os(namespace).write(sb.toString().getBytes());
@@ -319,7 +319,7 @@ public class XSDParser implements ErrorHandler {
 	private String getFieldDocumentation(String name) {
 		if (includeDocs & documentation.containsKey(name)) {
 
-			String s = documentation.get(name);
+			String s = documentation.get(name).trim();
 			// Handling possible multiline-comments
 			return s.replaceAll("\n", " ");
 		}
