@@ -43,14 +43,14 @@ public class TestHelper {
 
 	private static String generate(String name, String type, String extension,
 			String mappings) {
-		File dir = new File("src/test/data/actual/");
+		File dir = new File("target/generated-proto/");
 		if (!dir.exists())
 			dir.mkdir();
-		String filename = "src/test/data/actual/" + name + "." + extension;
+		String filename = "target/generated-proto/" + name + "." + extension;
 		try {
 			Main.main(new String[] { "--" + type, "--filename=" + filename,
 					"--package=default", "--customMappings=" + mappings,
-					"src/test/resources/contrib/" + name + ".xsd" });
+					"src/test/resources/xsd/" + name + ".xsd" });
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

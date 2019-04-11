@@ -10,7 +10,7 @@
 *.iml
 
 target
-src/test/data/actual/
+target/generated-proto/
 
 dependency-reduced-pom.xml
 
