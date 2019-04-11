@@ -6,6 +6,10 @@ message UnspecifiedType
 	required bytes object = 2;
 }
 
+
+/*
+ * The Atom cagegory construct is defined in section 4.2.2 of the format spec.
+ */
 message categoryType
 {
 	optional UnspecifiedType base = 1;
@@ -15,6 +19,10 @@ message categoryType
 	required string term = 5;
 }
 
+
+/*
+ * The Atom content construct is defined in section 4.1.3 of the format spec.
+ */
 message contentType
 {
 	optional UnspecifiedType base = 1;
@@ -29,6 +37,10 @@ message dateTimeType
 	optional string lang = 2;
 }
 
+
+/*
+ * The Atom generator element is defined in section 4.2.4 of the format spec.
+ */
 message generatorType
 {
 	optional UnspecifiedType base = 1;
@@ -37,18 +49,30 @@ message generatorType
 	optional string version = 4;
 }
 
+
+/*
+ * The Atom icon construct is defined in section 4.2.5 of the format spec.
+ */
 message iconType
 {
 	optional UnspecifiedType base = 1;
 	optional string lang = 2;
 }
 
+
+/*
+ * The Atom id construct is defined in section 4.2.6 of the format spec.
+ */
 message idType
 {
 	optional UnspecifiedType base = 1;
 	optional string lang = 2;
 }
 
+
+/*
+ * The Atom link construct is defined in section 3.4 of the format spec.
+ */
 message linkType
 {
 	optional UnspecifiedType base = 1;
@@ -61,12 +85,20 @@ message linkType
 	optional string type = 8;
 }
 
+
+/*
+ * The Atom logo construct is defined in section 4.2.8 of the format spec.
+ */
 message logoType
 {
 	optional UnspecifiedType base = 1;
 	optional string lang = 2;
 }
 
+
+/*
+ * The Atom text construct is defined in section 3.1 of the format spec.
+ */
 message textType
 {
 	optional UnspecifiedType base = 1;
@@ -86,6 +118,10 @@ message uriType
 	optional string lang = 2;
 }
 
+
+/*
+ * The Atom person construct is defined in section 3.2 of the format spec.
+ */
 message personType
 {
 	optional UnspecifiedType base = 1;
@@ -95,58 +131,70 @@ message personType
 	optional uriType uri = 5;
 }
 
+
+/*
+ * The Atom source construct is defined in section 4.2.11 of the format spec.
+ */
 message sourceType
 {
-	repeated personType author = 1;
+	repeated personType author = 1; // The Atom person construct is defined in section 3.2 of the format spec.
 	optional UnspecifiedType base = 2;
-	repeated categoryType category = 3;
-	repeated personType contributor = 4;
-	optional generatorType generator = 5;
-	optional iconType icon = 6;
-	optional idType id = 7;
+	repeated categoryType category = 3; // The Atom cagegory construct is defined in section 4.2.2 of the format spec.
+	repeated personType contributor = 4; // The Atom person construct is defined in section 3.2 of the format spec.
+	optional generatorType generator = 5; // The Atom generator element is defined in section 4.2.4 of the format spec.
+	optional iconType icon = 6; // The Atom icon construct is defined in section 4.2.5 of the format spec.
+	optional idType id = 7; // The Atom id construct is defined in section 4.2.6 of the format spec.
 	optional string lang = 8;
-	repeated linkType link = 9;
-	optional logoType logo = 10;
-	optional textType rights = 11;
-	optional textType subtitle = 12;
-	optional textType title = 13;
+	repeated linkType link = 9; // The Atom link construct is defined in section 3.4 of the format spec.
+	optional logoType logo = 10; // The Atom logo construct is defined in section 4.2.8 of the format spec.
+	optional textType rights = 11; // The Atom text construct is defined in section 3.1 of the format spec.
+	optional textType subtitle = 12; // The Atom text construct is defined in section 3.1 of the format spec.
+	optional textType title = 13; // The Atom text construct is defined in section 3.1 of the format spec.
 	optional dateTimeType updated = 14;
 }
 
+
+/*
+ * The Atom entry construct is defined in section 4.1.2 of the format spec.
+ */
 message entryType
 {
-	repeated personType author = 1;
+	repeated personType author = 1; // The Atom person construct is defined in section 3.2 of the format spec.
 	optional UnspecifiedType base = 2;
-	repeated categoryType category = 3;
-	optional contentType content = 4;
-	repeated personType contributor = 5;
-	optional idType id = 6;
+	repeated categoryType category = 3; // The Atom cagegory construct is defined in section 4.2.2 of the format spec.
+	optional contentType content = 4; // The Atom content construct is defined in section 4.1.3 of the format spec.
+	repeated personType contributor = 5; // The Atom person construct is defined in section 3.2 of the format spec.
+	optional idType id = 6; // The Atom id construct is defined in section 4.2.6 of the format spec.
 	optional string lang = 7;
-	repeated linkType link = 8;
+	repeated linkType link = 8; // The Atom link construct is defined in section 3.4 of the format spec.
 	optional dateTimeType published = 9;
-	optional textType rights = 10;
-	optional textType source = 11;
-	optional textType summary = 12;
-	optional textType title = 13;
+	optional textType rights = 10; // The Atom text construct is defined in section 3.1 of the format spec.
+	optional textType source = 11; // The Atom text construct is defined in section 3.1 of the format spec.
+	optional textType summary = 12; // The Atom text construct is defined in section 3.1 of the format spec.
+	optional textType title = 13; // The Atom text construct is defined in section 3.1 of the format spec.
 	optional dateTimeType updated = 14;
 }
 
+
+/*
+ * The Atom feed construct is defined in section 4.1.1 of the format spec.
+ */
 message feedType
 {
-	repeated personType author = 1;
+	repeated personType author = 1; // The Atom person construct is defined in section 3.2 of the format spec.
 	optional UnspecifiedType base = 2;
-	repeated categoryType category = 3;
-	repeated personType contributor = 4;
-	repeated entryType entry = 5;
-	optional generatorType generator = 6;
-	optional iconType icon = 7;
-	optional idType id = 8;
+	repeated categoryType category = 3; // The Atom cagegory construct is defined in section 4.2.2 of the format spec.
+	repeated personType contributor = 4; // The Atom person construct is defined in section 3.2 of the format spec.
+	repeated entryType entry = 5; // The Atom entry construct is defined in section 4.1.2 of the format spec.
+	optional generatorType generator = 6; // The Atom generator element is defined in section 4.2.4 of the format spec.
+	optional iconType icon = 7; // The Atom icon construct is defined in section 4.2.5 of the format spec.
+	optional idType id = 8; // The Atom id construct is defined in section 4.2.6 of the format spec.
 	optional string lang = 9;
-	repeated linkType link = 10;
-	optional logoType logo = 11;
-	optional textType rights = 12;
-	optional textType subtitle = 13;
-	optional textType title = 14;
+	repeated linkType link = 10; // The Atom link construct is defined in section 3.4 of the format spec.
+	optional logoType logo = 11; // The Atom logo construct is defined in section 4.2.8 of the format spec.
+	optional textType rights = 12; // The Atom text construct is defined in section 3.1 of the format spec.
+	optional textType subtitle = 13; // The Atom text construct is defined in section 3.1 of the format spec.
+	optional textType title = 14; // The Atom text construct is defined in section 3.1 of the format spec.
 	optional dateTimeType updated = 15;
 }
 

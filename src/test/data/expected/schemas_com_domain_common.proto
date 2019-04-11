@@ -6,6 +6,10 @@ message UnspecifiedType
 	required bytes object = 2;
 }
 
+
+/*
+ * A country.  ISO3 code is the unique identifier.
+ */
 message country
 {
 	required string description = 1;
