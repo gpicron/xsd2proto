@@ -17,16 +17,7 @@ public class MultipleNamespaceTest {
             e.printStackTrace();
         }
     }*/
-    
-    @BeforeClass
-    public static void generateThriftForTests(){
-        try {
-            Main.main(new String[]{"--thrift","--splitBySchema=true","--directory=src/test/data/actual/","--package=schemas.com.domain.common","contrib/ns-person.xsd"});
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail(e.toString());
-        }
-    }
+
     @BeforeClass
     public static void generateProtobufForTests(){
         try {
