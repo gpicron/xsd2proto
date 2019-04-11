@@ -1,7 +1,6 @@
 # XSD2THRIFT  [![CircleCI](https://circleci.com/gh/entur/xsd2thrift.svg?style=svg)](https://circleci.com/gh/entur/xsd2thrift)
 
-This tool allows for converting XML Schema files (.xsd) to Thrift (.thrift) and
-Protocol Buffers (.proto).
+This tool allows for converting XML Schema files (.xsd) to Protocol Buffers (.proto).
 
 ## Binary download
 
@@ -15,7 +14,7 @@ To be updated
 
 To build xsd2thrift, you need Maven (http://maven.apache.org/) installed. To build xsd2thrift, run `mvn install`.
 
-xsd2thrift has been tested on Java SE 6.
+xsd2thrift has been tested on JDK 8.
 
 ## Usage
 
@@ -45,11 +44,6 @@ XSOM is covered by GPL v2 with classpath exception (see LICENSE-xsom.1).
 XSOM internally uses an URI class, which is copyrighted by Thai Open Source
 Center (see LICENSE-xsom.2).
 
-## Contact
-
-Any feedback will be greatly appreciated, at the GitHub project page
-(http://github.com/tranchis/xsd2thrift) or at tranchis_-_AT_-_gmail.com.
-
 ## Contributors (@github.com)
 
 * tranchis
@@ -59,4 +53,5 @@ Any feedback will be greatly appreciated, at the GitHub project page
 * wesyoung
 * dabble
 * ae589
-
+* seime
+* lassetyr

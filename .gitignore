@@ -11,3 +11,6 @@
 
 target
 src/test/data/actual/
+
+dependency-reduced-pom.xml
+

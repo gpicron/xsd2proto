@@ -50,7 +50,7 @@ public class TestHelper {
 		try {
 			Main.main(new String[] { "--" + type, "--filename=" + filename,
 					"--package=default", "--customMappings=" + mappings,
-					"contrib/" + name + ".xsd" });
+					"src/test/resources/contrib/" + name + ".xsd" });
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

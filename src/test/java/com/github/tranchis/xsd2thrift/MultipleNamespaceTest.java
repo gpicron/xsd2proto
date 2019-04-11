@@ -21,7 +21,7 @@ public class MultipleNamespaceTest {
     @BeforeClass
     public static void generateProtobufForTests(){
         try {
-            Main.main(new String[]{"--protobuf","--splitBySchema=true","--directory=src/test/data/actual/","--package=schemas.com.domain.common","contrib/ns-person.xsd"});
+            Main.main(new String[]{"--protobuf","--splitBySchema=true","--directory=src/test/data/actual/","--package=schemas.com.domain.common","src/test/resources/contrib/ns-person.xsd"});
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.toString());
