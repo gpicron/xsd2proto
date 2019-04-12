@@ -12,5 +12,7 @@
 target
 target/generated-proto/
 
+local_config
+
 dependency-reduced-pom.xml
 

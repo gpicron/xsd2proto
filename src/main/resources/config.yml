@@ -1,4 +1,3 @@
-marshaller: protobuf
 protobufVersion: 3
 filename: generated-file.proto
 directory:
