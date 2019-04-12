@@ -23,6 +23,7 @@
  */
 package com.github.tranchis.xsd2thrift;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -30,11 +31,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.github.tranchis.xsd2thrift.marshal.IMarshaller;
-import com.github.tranchis.xsd2thrift.marshal.ProtobufMarshaller;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
+import com.github.tranchis.xsd2thrift.marshal.IMarshaller;
+import com.github.tranchis.xsd2thrift.marshal.ProtobufMarshaller;
+
 public class Main {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
+
 	private static boolean correct;
 	private static String usage = ""
 			+ "Usage: java xsd2proto-<VERSION>.jar [--output=FILENAME]\n"
@@ -55,12 +62,12 @@ public class Main {
 			+ "";
 
 	private static void usage(String error) {
-		System.err.println(error);
+		LOGGER.error(error);
 		usage();
 	}
 
 	private static void usage() {
-		System.err.print(usage);
+		LOGGER.info(usage);
 		correct = false;
 	}
 
@@ -68,7 +75,7 @@ public class Main {
 	 * @param args
 	 * @throws Exception
 	 */
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args)   {
 		XSDParser xp;
 		TreeMap<String, String> map;
 		String xsd, param;
@@ -110,7 +117,8 @@ public class Main {
 
 			if (args.length == 2 && args[0].startsWith("--configFile=")) {
 				Yaml yaml = new Yaml();
-				try (InputStream in = Files.newInputStream(Paths.get(args[0].split("=")[1]))) {
+				String configFile = args[0].split("=")[1];
+				try (InputStream in = Files.newInputStream(Paths.get(configFile))) {
 					ConfigFile config = yaml.loadAs(in, ConfigFile.class);
 
 					pbm.setProtobufVersion(config.protobufVersion);
@@ -128,6 +136,8 @@ public class Main {
 					xp.setTypeInEnums(config.typeInEnums);
 					xp.setIncludeMessageDocs(config.includeMessageDocs);
 					xp.setIncludeFieldDocs(config.includeFieldDocs);
+				} catch (IOException e) {
+					LOGGER.error("Unable to find config file "+configFile,e);
 				}
 			} else {
 				i = 0;
@@ -186,7 +196,13 @@ public class Main {
 			}
 
 			if (correct) {
-				xp.parse();
+				try {
+					xp.parse();
+				} catch (InvalidXSDException e) {
+					LOGGER.error("Error converting xsd to proto: {}",e.getMessage());
+				} catch (Exception e) {
+					LOGGER.error("Error parsing xsd",e);
+				}
 			}
 		}
 	}

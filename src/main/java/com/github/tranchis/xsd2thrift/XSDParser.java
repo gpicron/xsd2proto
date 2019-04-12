@@ -27,6 +27,9 @@ import com.github.tranchis.xsd2thrift.marshal.IMarshaller;
 import com.sun.xml.xsom.*;
 import com.sun.xml.xsom.parser.XSOMParser;
 import com.sun.xml.xsom.util.DomAnnotationParserFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -39,6 +42,9 @@ import java.io.OutputStream;
 import java.util.*;
 
 public class XSDParser implements ErrorHandler {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(XSDParser.class);
+
 	private File f;
 	private Map<String, Struct> map;
 	private Map<String, Enumeration> enums;
@@ -199,25 +205,23 @@ public class XSDParser implements ErrorHandler {
 					}
 				} else {
 					// Report circular dependency
-					System.err
-							.println("Source schema contains circular dependencies and the target marshaller does not support them. Refer to the reduced dependency graph below.");
+					LOGGER.error("Source schema contains circular dependencies and the target marshaller does not support them. Refer to the reduced dependency graph below.");
 					for (Struct s : ss) {
 						s.getTypes().removeAll(declared);
-						System.err.println(s.getName() + ": " + s.getTypes());
+						LOGGER.error(s.getName() + ": " + s.getTypes());
 					}
-					throw new Exception();
+					throw new InvalidXSDException();
 				}
 			} else {
 				// Missing types have been detected
-				System.err
-						.println("Source schema contains references missing types.");
+				LOGGER.error("Source schema contains references missing types");
 				for (Struct s : ss) {
 					s.getTypes().retainAll(requiredTypes);
 					if (!s.getTypes().isEmpty()) {
-						System.err.println(s.getName() + ": " + s.getTypes());
+						LOGGER.error(s.getName() + ": " + s.getTypes());
 					}
 				}
-				throw new Exception();
+				throw new InvalidXSDException();
 			}
 		}
 	}
@@ -764,21 +768,21 @@ public class XSDParser implements ErrorHandler {
 
 	@Override
 	public void error(SAXParseException exception) throws SAXException {
-		System.out.println(exception.getMessage() + " at "
+		LOGGER.error(exception.getMessage() + " at "
 				+ exception.getSystemId());
 		exception.printStackTrace();
 	}
 
 	@Override
 	public void fatalError(SAXParseException exception) throws SAXException {
-		System.out.println(exception.getMessage() + " at "
+		LOGGER.error(exception.getMessage() + " at "
 				+ exception.getSystemId());
 		exception.printStackTrace();
 	}
 
 	@Override
 	public void warning(SAXParseException exception) throws SAXException {
-		System.out.println(exception.getMessage() + " at "
+		LOGGER.warn(exception.getMessage() + " at "
 				+ exception.getSystemId());
 		exception.printStackTrace();
 	}
