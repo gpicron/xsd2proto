@@ -23,14 +23,14 @@
  */
 package com.github.tranchis.xsd2thrift.marshal;
 
-import com.google.common.base.CaseFormat;
-
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
-import java.util.HashMap;
 
-public class ProtobufMarshaller implements IMarshaller {
+import com.google.common.base.CaseFormat;
+
+public class ProtobufMarshaller   {
 	private TreeMap<String, String> typeMapping;
 	private String indent = "";
 	private int version = 2;
@@ -81,7 +81,7 @@ public class ProtobufMarshaller implements IMarshaller {
 		imports.put("google.protobuf.Duration", "google/protobuf/duration.proto");
 	}
 
-	@Override
+	
 	public String writeHeader(String namespace) {
 		String res;
 
@@ -98,7 +98,7 @@ public class ProtobufMarshaller implements IMarshaller {
 		return res;
 	}
 
-	@Override
+	
 	public String writeEnumHeader(String name) {
 		final String result = writeIndent() + "enum " + name + "\n"
 				+ writeIndent() + "{\n";
@@ -106,25 +106,25 @@ public class ProtobufMarshaller implements IMarshaller {
 		return result;
 	}
 
-	@Override
+	
 	public String writeEnumValue(int order, String value) {
 		return (writeIndent() + CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, value) + " = " + order + ";\n");
 	}
 
-	@Override
+	
 	public String writeEnumFooter() {
 		decreaseIndent();
 		return writeIndent() + "}\n";
 	}
 
-	@Override
+	
 	public String writeStructHeader(String name) {
 		final String result = writeIndent() + "message " + name + "\n{\n";
 		increaseIndent();
 		return result;
 	}
 
-	@Override
+	
 	public String writeStructParameter(int order, boolean required,
 			boolean repeated, String name, String type, String fieldDocumentation) {
 		String sRequired = "";
@@ -158,23 +158,23 @@ public class ProtobufMarshaller implements IMarshaller {
 		return res;
 	}
 
-	@Override
+	
 	public String writeStructFooter() {
 		decreaseIndent();
 		return writeIndent() + "}\n\n";
 	}
 
-	@Override
+	
 	public String getTypeMapping(String type) {
 		return typeMapping.get(type);
 	}
 
-	@Override
+	
 	public boolean isNestedEnums() {
 		return true;
 	}
 
-	@Override
+	
 	public boolean isCircularDependencySupported() {
 		return true;
 	}
@@ -192,7 +192,7 @@ public class ProtobufMarshaller implements IMarshaller {
 		return indent;
 	}
 
-	@Override
+	
 	public String writeInclude(String namespace) {
 		String res;
 
@@ -205,7 +205,7 @@ public class ProtobufMarshaller implements IMarshaller {
 		return res;
 	}
 
-	@Override
+	
 	public void setCustomMappings(Map<String, String> customMappings) {
 		if (customMappings != null) {
 			for (Entry<String, String> entry : customMappings.entrySet()) {
@@ -218,7 +218,7 @@ public class ProtobufMarshaller implements IMarshaller {
 		 this.version = version;
 	}
 
-	@Override
+	
 	public String getImport(String typeName) {
 		if (imports != null) {
 			return imports.get(getTypeMapping(typeName));

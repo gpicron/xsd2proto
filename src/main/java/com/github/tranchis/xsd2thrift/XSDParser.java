@@ -23,10 +23,20 @@
  */
 package com.github.tranchis.xsd2thrift;
 
-import com.github.tranchis.xsd2thrift.marshal.IMarshaller;
-import com.sun.xml.xsom.*;
-import com.sun.xml.xsom.parser.XSOMParser;
-import com.sun.xml.xsom.util.DomAnnotationParserFactory;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
+import javax.xml.parsers.SAXParserFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,11 +45,23 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import javax.xml.parsers.SAXParserFactory;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.*;
+import com.github.tranchis.xsd2thrift.marshal.ProtobufMarshaller;
+import com.sun.xml.xsom.XSAttGroupDecl;
+import com.sun.xml.xsom.XSAttributeDecl;
+import com.sun.xml.xsom.XSAttributeUse;
+import com.sun.xml.xsom.XSComplexType;
+import com.sun.xml.xsom.XSElementDecl;
+import com.sun.xml.xsom.XSFacet;
+import com.sun.xml.xsom.XSModelGroup;
+import com.sun.xml.xsom.XSParticle;
+import com.sun.xml.xsom.XSRestrictionSimpleType;
+import com.sun.xml.xsom.XSSchema;
+import com.sun.xml.xsom.XSSchemaSet;
+import com.sun.xml.xsom.XSSimpleType;
+import com.sun.xml.xsom.XSTerm;
+import com.sun.xml.xsom.XSType;
+import com.sun.xml.xsom.parser.XSOMParser;
+import com.sun.xml.xsom.util.DomAnnotationParserFactory;
 
 public class XSDParser implements ErrorHandler {
 	
@@ -52,7 +74,7 @@ public class XSDParser implements ErrorHandler {
 	private Map<String, String> documentation;
 	private Set<String> keywords, basicTypes;
 	private TreeMap<String, String> xsdMapping;
-	private IMarshaller marshaller;
+	private ProtobufMarshaller marshaller;
 	private OutputWriter writer;
 	private boolean nestEnums = true;
 	private int enumOrderStart = 1;
@@ -789,7 +811,7 @@ public class XSDParser implements ErrorHandler {
 		exception.printStackTrace();
 	}
 
-	public void addMarshaller(IMarshaller marshaller) {
+	public void addMarshaller(ProtobufMarshaller marshaller) {
 		this.marshaller = marshaller;
 	}
 

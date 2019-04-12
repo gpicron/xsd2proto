@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.github.tranchis.xsd2thrift.marshal.IMarshaller;
+import com.github.tranchis.xsd2thrift.marshal.ProtobufMarshaller;
 
 /**
  * @author p14n
@@ -50,7 +50,7 @@ public class OutputWriter {
 	private boolean splitBySchema;
 	private OutputStream os;
 	private Map<String,OutputStream> streams;
-	private IMarshaller marshaller;
+	private ProtobufMarshaller marshaller;
     private String defaultNamespace;
     private String defaultExtension;
     Map<String,Set<String>> inclusions = null;
@@ -120,7 +120,7 @@ public class OutputWriter {
         this.splitBySchema = splitBySchema;
     }
 
-    public void setMarshaller(IMarshaller marshaller) {
+    public void setMarshaller(ProtobufMarshaller marshaller) {
         this.marshaller = marshaller;
     }
 

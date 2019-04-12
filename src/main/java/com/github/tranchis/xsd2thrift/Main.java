@@ -35,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
-import com.github.tranchis.xsd2thrift.marshal.IMarshaller;
 import com.github.tranchis.xsd2thrift.marshal.ProtobufMarshaller;
 
 public class Main {
@@ -82,10 +81,10 @@ public class Main {
 		int i;
 		int protobufVersion = 2;
 		ProtobufMarshaller pbm = null;
-		IMarshaller im;
+	
 		OutputWriter writer;
 		correct = true;
-		im = null;
+		
 
 		map = new TreeMap<String, String>();
 		map.put("schema_._type", "binary");
@@ -108,9 +107,9 @@ public class Main {
 
 
 			pbm = new ProtobufMarshaller();
-			im = pbm;
-			xp.addMarshaller(im);
-			writer.setMarshaller(im);
+			
+			xp.addMarshaller(pbm);
+			writer.setMarshaller(pbm);
 			writer.setDefaultExtension("proto");
 
 			Map<String, String> customMappings = null;
@@ -192,7 +191,7 @@ public class Main {
 
 			
 			 if (customMappings != null) {
-				im.setCustomMappings(customMappings);
+				pbm.setCustomMappings(customMappings);
 			}
 
 			if (correct) {
