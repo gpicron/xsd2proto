@@ -54,6 +54,7 @@ public class ProtobufMarshaller implements IMarshaller {
 		typeMapping.put("long", "int64");
 		typeMapping.put("decimal", "double");
 		typeMapping.put("ID", "string");
+		typeMapping.put("Name", "string");
 		typeMapping.put("IDREF", "string");
 		typeMapping.put("NMTOKEN", "string");
 		typeMapping.put("NMTOKENS", "string"); // TODO: Fix this

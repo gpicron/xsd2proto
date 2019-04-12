@@ -123,6 +123,8 @@ public class XSDParser implements ErrorHandler {
 		basicTypes.add("IDREF");
 		basicTypes.add("NMTOKEN");
 		basicTypes.add("NMTOKENS");
+		basicTypes.add("Name");
+		
 		// basicTypes.add("BaseObject");
 	}
 
