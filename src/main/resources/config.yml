@@ -7,6 +7,10 @@ nestEnums: false
 typeInEnums: true
 includeMessageDocs: true
 includeFieldDocs: true
-customMappings:
+customTypeMappings:
   - a:b
   - x:y
+customNameMappings:
+  - a:b
+  - x:y
+  

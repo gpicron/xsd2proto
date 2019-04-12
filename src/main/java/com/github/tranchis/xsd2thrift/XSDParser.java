@@ -276,8 +276,14 @@ public class XSDParser implements ErrorHandler {
 
 		writeMessageDocumentation(st.getName(), st.getNamespace());
 
+		String messageName = st.getName();/*
+		String mappedMessageName = marshaller.getTypeMapping(messageName) ;
+		if(mappedMessageName != null) {
+			messageName = mappedMessageName;
+		}
+	*/	
 		os(st.getNamespace()).write(
-				marshaller.writeStructHeader(escape(st.getName())).getBytes());
+				marshaller.writeStructHeader(escape(messageName)).getBytes());
 		itf = orderedIteratorForFields(st.getFields());
 		usedInEnums = new TreeSet<String>();
 		order = 1;

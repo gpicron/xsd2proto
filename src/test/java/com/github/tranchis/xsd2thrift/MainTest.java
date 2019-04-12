@@ -41,12 +41,11 @@ public class MainTest {
 	}
 
 	@Test
-	@Ignore
 	public void compareTestDatatypesStringDatesProtobuf() {
 		compareExpectedAndGenerated(
 				"src/test/resources/expectedproto/test-datatypes-string-dates.proto",
 				generateProtobuf("test-datatypes-string-dates",
-						"date:string,dateTime:string"));
+						"date:string,dateTime:string",null));
 	}
 
 	@Test
@@ -87,6 +86,15 @@ public class MainTest {
 	public void compareRecipemlProtobuf() {
 		compareExpectedAndGenerated("src/test/resources/expectedproto/recipeml.proto",
 				generateProtobuf("recipeml"));
+	}
+
+	@Test
+	@Ignore("Implementation not yet complete")
+	public void fieldAndMessageRenaming() {
+		compareExpectedAndGenerated(
+				"src/test/resources/expectedproto/complexTypeRenaming.proto",
+				generateProtobuf("complexTypeRenaming",null,
+						"ElementListOriginalName:ElementListNewName,ElementInListOfComplexTypeOriginalName:ElementInListOfComplexTypeNewName,ComplexTypeOriginalName:ComplexTypeNewName,ElementInListOriginalName:ElementInListNewName"));
 	}
 
 }

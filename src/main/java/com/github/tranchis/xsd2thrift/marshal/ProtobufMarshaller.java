@@ -206,9 +206,9 @@ public class ProtobufMarshaller   {
 	}
 
 	
-	public void setCustomMappings(Map<String, String> customMappings) {
-		if (customMappings != null) {
-			for (Entry<String, String> entry : customMappings.entrySet()) {
+	public void setCustomMappings(Map<String, String> customTypeMappings) {
+		if (customTypeMappings != null) {
+			for (Entry<String, String> entry : customTypeMappings.entrySet()) {
 				typeMapping.put(entry.getKey(), entry.getValue());
 			}
 		}

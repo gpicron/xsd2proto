@@ -10,19 +10,31 @@ public class ConfigFile {
     public String directory;
     public String namespace;
     public boolean splitBySchema = false;
-    public Map<String, String> customMappingsMap = new HashMap<>();
+    public Map<String, String> customTypeMappings = new HashMap<>();
+    public Map<String, String> customNameMappings = new HashMap<>();
     public boolean nestEnums;
     public boolean typeInEnums = true;
     public boolean includeMessageDocs = true;
     public boolean includeFieldDocs = true;
     public String xsd;
 
-    public void setCustomMappings(List<String> customMappings) {
+    public void setCustomTypeMappings(List<String> customTypeMappings) {
 
-        for (String mapping : customMappings) {
+        for (String mapping : customTypeMappings) {
             int colon = mapping.indexOf(':');
             if (colon > -1) {
-                this.customMappingsMap.put(mapping.substring(0, colon),
+                this.customTypeMappings.put(mapping.substring(0, colon),
+                        mapping.substring(colon + 1));
+            }
+        }
+    }
+
+    public void setCustomNameMappings(List<String> customNameMappings) {
+
+        for (String mapping : customNameMappings) {
+            int colon = mapping.indexOf(':');
+            if (colon > -1) {
+                this.customNameMappings.put(mapping.substring(0, colon),
                         mapping.substring(colon + 1));
             }
         }

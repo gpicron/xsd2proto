@@ -53,7 +53,8 @@ public class Main {
 			+ "  --package=NAME                  : set namespace/package of the output file\n"
 			+ "  --nestEnums=true|false          : nest enum declaration within messages that reference them, only supported by protobuf, defaults to true\n"
 			+ "  --splitBySchema=true|false      : split output into namespace-specific files, defaults to false\n"
-			+ "  --customMappings=a:b,x:y        : represent schema types as specific output types\n"
+			+ "  --customTypeMappings=a:b,x:y    : represent schema types as specific output types\n"
+			+ "  --customNameMappings=cake:kake,...: translate message and field names\n"
 			+ "  --protobufVersion=2|3           : if generating protobuf, choose the version (2 or 3)\n"
 			+ "  --typeInEnums=true|false        : include type as a prefix in enums, defaults to true\n"
 			+ "  --includeMessageDocs=true|false : include documentation of messages in output, defaults to true\n"
@@ -112,7 +113,8 @@ public class Main {
 			writer.setMarshaller(pbm);
 			writer.setDefaultExtension("proto");
 
-			Map<String, String> customMappings = null;
+			Map<String, String> customTypeMappings = null;
+			Map<String, String> customNameMappings = null;
 
 			if (args.length == 2 && args[0].startsWith("--configFile=")) {
 				Yaml yaml = new Yaml();
@@ -127,8 +129,11 @@ public class Main {
 					writer.setDefaultNamespace(config.namespace);
 					writer.setSplitBySchema(config.splitBySchema);
 
-					customMappings = new HashMap<>();
-					customMappings.putAll(config.customMappingsMap);
+					customTypeMappings = new HashMap<>();
+					customTypeMappings.putAll(config.customTypeMappings);
+
+					customNameMappings = new HashMap<>();
+					customNameMappings.putAll(config.customNameMappings);
 
 					xp.setNestEnums(config.nestEnums);
 					xp.setEnumOrderStart(0);
@@ -153,17 +158,30 @@ public class Main {
 					} else if (args[i].startsWith("--splitBySchema=")) {
 						param = args[i].split("=")[1];
 						writer.setSplitBySchema("true".equals(param));
-					} else if (args[i].startsWith("--customMappings=")) {
+					} else if (args[i].startsWith("--customTypeMappings=")) {
 						param = args[i].split("=")[1];
-						customMappings = new HashMap<String, String>();
+						customTypeMappings = new HashMap<String, String>();
 						for (String mapping : param.split(",")) {
 							int colon = mapping.indexOf(':');
 							if (colon > -1) {
-								customMappings.put(mapping.substring(0, colon),
+								customTypeMappings.put(mapping.substring(0, colon),
 										mapping.substring(colon + 1));
 							} else {
 								usage(mapping
-										+ " is not a valid custom mapping - use schematype:outputtype");
+										+ " is not a valid custom tyope mapping - use schematype:outputtype");
+							}
+						}
+					} else if (args[i].startsWith("--customNameMappings=")) {
+						param = args[i].split("=")[1];
+						customNameMappings = new HashMap<String, String>();
+						for (String mapping : param.split(",")) {
+							int colon = mapping.indexOf(':');
+							if (colon > -1) {
+								customNameMappings.put(mapping.substring(0, colon),
+										mapping.substring(colon + 1));
+							} else {
+								usage(mapping
+										+ " is not a valid custom name mapping - use originalname:newname");
 							}
 						}
 					} else if (args[i].startsWith("--nestEnums=")) {
@@ -190,8 +208,8 @@ public class Main {
 			}
 
 			
-			 if (customMappings != null) {
-				pbm.setCustomMappings(customMappings);
+			 if (customTypeMappings != null) {
+				pbm.setCustomMappings(customTypeMappings);
 			}
 
 			if (correct) {
