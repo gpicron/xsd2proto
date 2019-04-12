@@ -37,7 +37,7 @@ import org.yaml.snakeyaml.Yaml;
 public class Main {
 	private static boolean correct;
 	private static String usage = ""
-			+ "Usage: java xsd2proto.jar [--output=FILENAME]\n"
+			+ "Usage: java xsd2proto-<VERSION>.jar [--output=FILENAME]\n"
 			+ "                           [--package=NAME] filename.xsd\n"
 			+ "\n"
 			+ "  --configFile=FILENAME           : path to configuration file\n"

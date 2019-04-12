@@ -11,27 +11,26 @@ To be updated
 
 To be updated
 
-## Building
-
-To build xsd2proto, you need Maven (http://maven.apache.org/) installed. To build xsd2proto, run `mvn clean package`.
-
 
 ## Usage
 
-```bash
-Usage: java xsd2proto.jar [--output=FILENAME]
-                                  [--package=NAME] filename.xsd
-       
-     --filename=FILENAME             : store the result in FILENAME instead of standard output
-     --package=NAME                  : set namespace/package of the output file
-     --nestEnums=true|false          : nest enum declaration within messages that reference them, only supported by protobuf, defaults to true
-     --splitBySchema=true|false      : split output into namespace-specific files, defaults to false
-     --customMappings=a:b,x:y        : represent schema types as specific output types
-     --protobufVersion=2|3           : if generating protobuf, choose the version (2 or 3)
-     --typeInEnums=true|false        : include type as a prefix in enums, defaults to true
-     --includeMessageDocs=true|false : include documentation of messages in output, defaults to true
-     --includeFieldDocs=true|false   : include documentation for fields in output, defaults to true
+```
+Usage: java xsd2proto-<VERSION>.jar [--output=FILENAME]
+                           [--package=NAME] filename.xsd
 
+  --configFile=FILENAME           : path to configuration file
+
+OR
+
+  --filename=FILENAME             : store the result in FILENAME instead of standard output
+  --package=NAME                  : set namespace/package of the output file
+  --nestEnums=true|false          : nest enum declaration within messages that reference them, only supported by protobuf, defaults to true
+  --splitBySchema=true|false      : split output into namespace-specific files, defaults to false
+  --customMappings=a:b,x:y        : represent schema types as specific output types
+  --protobufVersion=2|3           : if generating protobuf, choose the version (2 or 3)
+  --typeInEnums=true|false        : include type as a prefix in enums, defaults to true
+  --includeMessageDocs=true|false : include documentation of messages in output, defaults to true
+  --includeFieldDocs=true|false   : include documentation for fields in output, defaults to true
 ```
 
 ## License

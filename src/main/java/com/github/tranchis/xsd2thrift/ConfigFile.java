@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 public class ConfigFile {
-    public String marshaller = "protobuf";
     public int protobufVersion = 3;
     public String filename;
     public String directory;
