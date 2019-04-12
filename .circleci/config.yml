@@ -18,7 +18,6 @@ jobs:
         paths:
         - ~/.m2
         key: dep-cache-base
-#        key: dep-cache-{{ checksum "pom.xml" }}
     # Cannot use -o because of snapshot dependencies.
     - run: mvn test -s /tools/m2/settings.xml
     - run:
