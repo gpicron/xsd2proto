@@ -10,8 +10,8 @@ public class ConfigFile {
     public String directory;
     public String namespace;
     public boolean splitBySchema = false;
-    public Map<String, String> customTypeMappings = new HashMap<>();
-    public Map<String, String> customNameMappings = new HashMap<>();
+    public Map<String, String> customTypeMappingsMap = new HashMap<>();
+    public Map<String, String> customNameMappingsMap = new HashMap<>();
     public boolean nestEnums;
     public boolean typeInEnums = true;
     public boolean includeMessageDocs = true;
@@ -23,7 +23,7 @@ public class ConfigFile {
         for (String mapping : customTypeMappings) {
             int colon = mapping.indexOf(':');
             if (colon > -1) {
-                this.customTypeMappings.put(mapping.substring(0, colon),
+                this.customTypeMappingsMap.put(mapping.substring(0, colon),
                         mapping.substring(colon + 1));
             }
         }
@@ -34,7 +34,7 @@ public class ConfigFile {
         for (String mapping : customNameMappings) {
             int colon = mapping.indexOf(':');
             if (colon > -1) {
-                this.customNameMappings.put(mapping.substring(0, colon),
+                this.customNameMappingsMap.put(mapping.substring(0, colon),
                         mapping.substring(colon + 1));
             }
         }
