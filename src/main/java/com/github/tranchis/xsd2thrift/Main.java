@@ -208,8 +208,11 @@ public class Main {
 			}
 
 			
-			 if (customTypeMappings != null) {
-				pbm.setCustomMappings(customTypeMappings);
+			if (customTypeMappings != null) {
+				pbm.setCustomTypeMappings(customTypeMappings);
+			}
+			if (customNameMappings != null) {
+				pbm.setCustomNameMappings(customNameMappings);
 			}
 
 			if (correct) {

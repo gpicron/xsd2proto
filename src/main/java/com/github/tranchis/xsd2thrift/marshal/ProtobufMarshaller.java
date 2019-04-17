@@ -32,6 +32,7 @@ import com.google.common.base.CaseFormat;
 
 public class ProtobufMarshaller   {
 	private TreeMap<String, String> typeMapping;
+	private TreeMap<String, String> nameMapping;
 	private String indent = "";
 	private int version = 2;
 	private HashMap<String, String> imports;
@@ -75,6 +76,9 @@ public class ProtobufMarshaller   {
 
 		typeMapping.put("time", "google.protobuf.Timestamp");
 		typeMapping.put("duration", "google.protobuf.Duration");
+
+
+		nameMapping = new TreeMap<String, String>();
 
 		imports = new HashMap<String, String>();
 		imports.put("google.protobuf.Timestamp", "google/protobuf/timestamp.proto");
@@ -169,6 +173,11 @@ public class ProtobufMarshaller   {
 		return typeMapping.get(type);
 	}
 
+
+	public String getNameMapping(String type) {
+		return nameMapping.get(type);
+	}
+
 	
 	public boolean isNestedEnums() {
 		return true;
@@ -206,10 +215,18 @@ public class ProtobufMarshaller   {
 	}
 
 	
-	public void setCustomMappings(Map<String, String> customTypeMappings) {
+	public void setCustomTypeMappings(Map<String, String> customTypeMappings) {
 		if (customTypeMappings != null) {
 			for (Entry<String, String> entry : customTypeMappings.entrySet()) {
 				typeMapping.put(entry.getKey(), entry.getValue());
+			}
+		}
+	}
+
+	public void setCustomNameMappings(Map<String, String> customNameMappings) {
+		if (customNameMappings != null) {
+			for (Entry<String, String> entry : customNameMappings.entrySet()) {
+				nameMapping.put(entry.getKey(), entry.getValue());
 			}
 		}
 	}
