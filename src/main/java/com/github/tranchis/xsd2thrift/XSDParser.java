@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -73,7 +74,7 @@ public class XSDParser implements ErrorHandler {
 	private Map<String, String> simpleTypes;
 	private Map<String, String> documentation;
 	private Set<String> keywords, basicTypes;
-	private TreeMap<String, String> xsdMapping;
+	private HashMap<String, String> xsdMapping;
 	private ProtobufMarshaller marshaller;
 	private OutputWriter writer;
 	private boolean nestEnums = true;
@@ -83,17 +84,17 @@ public class XSDParser implements ErrorHandler {
 	private boolean includeFieldDocs = true;
 
 	public XSDParser(String stFile) {
-		this.xsdMapping = new TreeMap<String, String>();
+		this.xsdMapping = new HashMap<String, String>();
 		init(stFile);
 	}
 
 	private void init(String stFile) {
 
 		this.f = new File(stFile);
-		map = new TreeMap<String, Struct>();
-		enums = new TreeMap<String, Enumeration>();
-		simpleTypes = new TreeMap<String, String>();
-		documentation = new TreeMap<String, String>();
+		map = new HashMap<String, Struct>();
+		enums = new HashMap<String, Enumeration>();
+		simpleTypes = new HashMap<String, String>();
+		documentation = new HashMap<String, String>();
 		keywords = new TreeSet<String>();
 		keywords.add("interface");
 		keywords.add("is");
@@ -150,7 +151,7 @@ public class XSDParser implements ErrorHandler {
 		// basicTypes.add("BaseObject");
 	}
 
-	public XSDParser(String stFile, TreeMap<String, String> xsdMapping) {
+	public XSDParser(String stFile, HashMap<String, String> xsdMapping) {
 		this.xsdMapping = xsdMapping;
 		init(stFile);
 	}

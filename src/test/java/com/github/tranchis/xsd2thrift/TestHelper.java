@@ -75,7 +75,7 @@ public class TestHelper {
 	}
 
 	public static String generateProtobuf(String name) {
-		return generate(name, "protobuf", "proto", "a:a", null, "default");
+		return generate(name, "protobuf", "proto", null, null, "default");
 	}
 
 	private static String generate(String name, String type, String extension, String typeMappings, String nameMappings, String packageName) {

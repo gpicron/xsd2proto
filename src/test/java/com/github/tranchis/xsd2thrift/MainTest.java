@@ -46,7 +46,7 @@ public class MainTest {
 		compareExpectedAndGenerated(
 				"src/test/resources/expectedproto/test-datatypes-string-dates.proto",
 				generateProtobuf("test-datatypes-string-dates",
-						"date:string,dateTime:string",null, "default"));
+						"^date$:string,^dateTime$:string",null, "default"));
 	}
 
 	@Test
@@ -94,7 +94,7 @@ public class MainTest {
 		compareExpectedAndGenerated(
 				"src/test/resources/expectedproto/complexTypeRenaming.proto",
 				generateProtobuf("complexTypeRenaming",null,
-						"ElementListOriginalName:ElementListNewName,ElementInListOfComplexTypeOriginalName:ElementInListOfComplexTypeNewName,ComplexTypeOriginalName:ComplexTypeNewName,ElementInListOriginalName:ElementInListNewName", "org.myrecipies"));
+						"^ElementListOriginalName$:ElementListNewName,^ElementInListOfComplexTypeOriginalName$:ElementInListOfComplexTypeNewName,^ComplexTypeOriginalName$:ComplexTypeNewName,^ElementInListOriginalName$:ElementInListNewName", "org.myrecipies"));
 	}
 
 }

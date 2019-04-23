@@ -27,58 +27,60 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.google.common.base.CaseFormat;
 
 public class ProtobufMarshaller   {
-	private TreeMap<String, String> typeMapping;
-	private TreeMap<String, String> nameMapping;
+	private HashMap<Pattern, String> typeMapping;
+	private HashMap<Pattern, String> nameMapping;
 	private String indent = "";
 	private int version = 2;
 	private HashMap<String, String> imports;
 
 	public ProtobufMarshaller() {
-		typeMapping = new TreeMap<String, String>();
-		typeMapping.put("positiveInteger", "int64");
-		typeMapping.put("nonPositiveInteger", "sint64");
-		typeMapping.put("negativeInteger", "sint64");
-		typeMapping.put("nonNegativeInteger", "int64");
-		typeMapping.put("int", "int32");
-		typeMapping.put("integer", "int64");
+		typeMapping = new HashMap<>();
+		typeMapping.put(Pattern.compile("^positiveInteger$"), "int64");
+		typeMapping.put(Pattern.compile("^nonPositiveInteger$"), "sint64");
+		typeMapping.put(Pattern.compile("^negativeInteger$"), "sint64");
+		typeMapping.put(Pattern.compile("^nonNegativeInteger$"), "int64");
+		typeMapping.put(Pattern.compile("^int$"), "int32");
+		typeMapping.put(Pattern.compile("^integer$"), "int64");
 
-		typeMapping.put("unsignedLong", "uint64");
-		typeMapping.put("unsignedInt", "uint32");
-		typeMapping.put("unsignedShort", "uint32"); // No 16-bit int in protobuf
-		typeMapping.put("unsignedByte", "uint32"); // No 8-bit int in protobuf
+		typeMapping.put(Pattern.compile("^unsignedLong$"), "uint64");
+		typeMapping.put(Pattern.compile("^unsignedInt$"), "uint32");
+		typeMapping.put(Pattern.compile("^unsignedShort$"), "uint32"); // No 16-bit int in protobuf
+		typeMapping.put(Pattern.compile("^unsignedByte$"), "uint32"); // No 8-bit int in protobuf
 
-		typeMapping.put("short", "int32"); // No 16-bit int in protobuf
-		typeMapping.put("long", "int64");
-		typeMapping.put("decimal", "double");
-		typeMapping.put("ID", "string");
-		typeMapping.put("Name", "string");
-		typeMapping.put("IDREF", "string");
-		typeMapping.put("NMTOKEN", "string");
-		typeMapping.put("NMTOKENS", "string"); // TODO: Fix this
-		typeMapping.put("anySimpleType", "UnspecifiedType");
-		typeMapping.put("anyType", "UnspecifiedType");
-		typeMapping.put("anyURI", "UnspecifiedType");
-		typeMapping.put("normalizedString", "string");
-		typeMapping.put("boolean", "bool");
-		typeMapping.put("binary", "bytes"); // UnspecifiedType.object is
+		typeMapping.put(Pattern.compile("^short$"), "int32"); // No 16-bit int in protobuf
+		typeMapping.put(Pattern.compile("^long$"), "int64");
+		typeMapping.put(Pattern.compile("^decimal$"), "double");
+		typeMapping.put(Pattern.compile("^ID$"), "string");
+		typeMapping.put(Pattern.compile("^Name$"), "string");
+		typeMapping.put(Pattern.compile("^IDREF$"), "string");
+		typeMapping.put(Pattern.compile("^NMTOKEN$"), "string");
+		typeMapping.put(Pattern.compile("^NMTOKENS$"), "string"); // TODO: Fix this
+		typeMapping.put(Pattern.compile("^anySimpleType$"), "UnspecifiedType");
+		typeMapping.put(Pattern.compile("^anyType$"), "UnspecifiedType");
+		typeMapping.put(Pattern.compile("^anyURI$"), "string");
+		typeMapping.put(Pattern.compile("^normalizedString$"), "string");
+		typeMapping.put(Pattern.compile("^boolean$"), "bool");
+		typeMapping.put(Pattern.compile("^binary$"), "bytes"); // UnspecifiedType.object is
 											// declared binary
-		typeMapping.put("hexBinary", "bytes");
-		typeMapping.put("base64Binary", "bytes");
-		typeMapping.put("byte", "bytes");
-		typeMapping.put("date", "int32"); // Number of days since January 1st,
+		typeMapping.put(Pattern.compile("^hexBinary$"), "bytes");
+		typeMapping.put(Pattern.compile("^base64Binary$"), "bytes");
+		typeMapping.put(Pattern.compile("^byte$"), "bytes");
+		typeMapping.put(Pattern.compile("^date$"), "int32"); // Number of days since January 1st),
 											// 1970
-		typeMapping.put("dateTime", "int64"); // Number of milliseconds since
-												// January 1st, 1970
+		typeMapping.put(Pattern.compile("^dateTime$"), "int64"); // Number of milliseconds since
+												// January 1st), 1970
 
-		typeMapping.put("time", "google.protobuf.Timestamp");
-		typeMapping.put("duration", "google.protobuf.Duration");
+		typeMapping.put(Pattern.compile("^time$"), "google.protobuf.Timestamp");
+		typeMapping.put(Pattern.compile("^duration$"), "google.protobuf.Duration");
 
 
-		nameMapping = new TreeMap<String, String>();
+		nameMapping = new HashMap<>();
 
 		imports = new HashMap<String, String>();
 		imports.put("google.protobuf.Timestamp", "google/protobuf/timestamp.proto");
@@ -170,12 +172,26 @@ public class ProtobufMarshaller   {
 
 	
 	public String getTypeMapping(String type) {
-		return typeMapping.get(type);
+		for(Pattern p : typeMapping.keySet()) {
+			Matcher m = p.matcher(type);
+			if (m.find()) {
+			    return m.replaceAll(typeMapping.get(p));
+			}	
+		}
+		
+		return null;
 	}
 
 
 	public String getNameMapping(String type) {
-		return nameMapping.get(type);
+		for(Pattern p : nameMapping.keySet()) {
+			Matcher m = p.matcher(type);
+			if (m.find()) {
+			    return m.replaceAll(nameMapping.get(p));
+			}	
+		}
+		
+		return null;
 	}
 
 	
@@ -215,17 +231,17 @@ public class ProtobufMarshaller   {
 	}
 
 	
-	public void setCustomTypeMappings(Map<String, String> customTypeMappings) {
+	public void setCustomTypeMappings(Map<Pattern, String> customTypeMappings) {
 		if (customTypeMappings != null) {
-			for (Entry<String, String> entry : customTypeMappings.entrySet()) {
+			for (Entry<Pattern, String> entry : customTypeMappings.entrySet()) {
 				typeMapping.put(entry.getKey(), entry.getValue());
 			}
 		}
 	}
 
-	public void setCustomNameMappings(Map<String, String> customNameMappings) {
+	public void setCustomNameMappings(Map<Pattern, String> customNameMappings) {
 		if (customNameMappings != null) {
-			for (Entry<String, String> entry : customNameMappings.entrySet()) {
+			for (Entry<Pattern, String> entry : customNameMappings.entrySet()) {
 				nameMapping.put(entry.getKey(), entry.getValue());
 			}
 		}

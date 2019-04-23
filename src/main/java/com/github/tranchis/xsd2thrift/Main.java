@@ -28,8 +28,12 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +80,7 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 		XSDParser xp;
-		TreeMap<String, String> map;
+		HashMap<String, String> map;
 		String xsd, param;
 		int i;
 		int protobufVersion = 2;
@@ -85,7 +89,7 @@ public class Main {
 		OutputWriter writer;
 		correct = true;
 
-		map = new TreeMap<String, String>();
+		map = new HashMap<>();
 		map.put("schema_._type", "binary");
 		map.put("EString", "string");
 		map.put("EBoolean", "boolean");
@@ -110,8 +114,8 @@ public class Main {
 			writer.setMarshaller(pbm);
 			writer.setDefaultExtension("proto");
 
-			Map<String, String> customTypeMappings = null;
-			Map<String, String> customNameMappings = null;
+			Map<Pattern, String> customTypeMappings = null;
+			Map<Pattern, String> customNameMappings = null;
 
 			if (args.length == 2 && args[0].startsWith("--configFile=")) {
 				Yaml yaml = new Yaml();
@@ -127,14 +131,20 @@ public class Main {
 					writer.setDefaultNamespace(config.namespace);
 					writer.setSplitBySchema(config.splitBySchema);
 
-					customTypeMappings = new HashMap<>();
+					customTypeMappings = new LinkedHashMap<>();
 					if (config.customTypeMappings != null) {
-						customTypeMappings.putAll(config.customTypeMappings);
+						for(Entry<String, String> kv : config.customTypeMappings.entrySet()) {
+							Pattern p = Pattern.compile(kv.getKey());
+							customTypeMappings.put(p, kv.getValue());
+						}
 					}
 
-					customNameMappings = new HashMap<>();
+					customNameMappings = new LinkedHashMap<>();
 					if (config.customNameMappings != null) {
-						customNameMappings.putAll(config.customNameMappings);
+						for(Entry<String, String> kv : config.customNameMappings.entrySet()) {
+							Pattern p = Pattern.compile(kv.getKey());
+							customNameMappings.put(p, kv.getValue());
+						}
 					}
 					xp.setNestEnums(config.nestEnums);
 					xp.setEnumOrderStart(0);
@@ -161,22 +171,22 @@ public class Main {
 						writer.setSplitBySchema("true".equals(param));
 					} else if (args[i].startsWith("--customTypeMappings=")) {
 						param = args[i].split("=")[1];
-						customTypeMappings = new HashMap<String, String>();
+						customTypeMappings = new HashMap<Pattern, String>();
 						for (String mapping : param.split(",")) {
 							int colon = mapping.indexOf(':');
 							if (colon > -1) {
-								customTypeMappings.put(mapping.substring(0, colon), mapping.substring(colon + 1));
+								customTypeMappings.put(Pattern.compile(mapping.substring(0, colon)), mapping.substring(colon + 1));
 							} else {
 								usage(mapping + " is not a valid custom tyope mapping - use schematype:outputtype");
 							}
 						}
 					} else if (args[i].startsWith("--customNameMappings=")) {
 						param = args[i].split("=")[1];
-						customNameMappings = new HashMap<String, String>();
+						customNameMappings = new HashMap<Pattern, String>();
 						for (String mapping : param.split(",")) {
 							int colon = mapping.indexOf(':');
 							if (colon > -1) {
-								customNameMappings.put(mapping.substring(0, colon), mapping.substring(colon + 1));
+								customNameMappings.put(Pattern.compile(mapping.substring(0, colon)), mapping.substring(colon + 1));
 							} else {
 								usage(mapping + " is not a valid custom name mapping - use originalname:newname");
 							}
