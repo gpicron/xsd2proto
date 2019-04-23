@@ -1,20 +1,22 @@
+syntax = "proto3";
+
 package default;
 
 message UnspecifiedType
 {
-	required string base_object_type = 1;
-	required bytes object = 2;
+	string base_object_type = 1;
+	bytes object = 2;
 }
 
 message Choice
 {
-	optional string a_default_minoccurs_element = 1;
-	optional string a_optional_element = 2;
+	string a_default_minoccurs_element = 1;
+	string a_optional_element = 2;
 	repeated string a_repeat_element = 3;
-	optional string a_required_element = 4;
-	optional string b_default_minoccurs_element = 5;
-	optional string b_optional_element = 6;
+	string a_required_element = 4;
+	string b_default_minoccurs_element = 5;
+	string b_optional_element = 6;
 	repeated string b_repeat_element = 7;
-	optional string b_required_element = 8;
+	string b_required_element = 8;
 }
 

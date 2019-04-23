@@ -31,8 +31,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
@@ -59,7 +57,6 @@ public class Main {
 			+ "  --splitBySchema=true|false      : split output into namespace-specific files, defaults to false\n"
 			+ "  --customTypeMappings=a:b,x:y    : represent schema types as specific output types\n"
 			+ "  --customNameMappings=cake:kake,...: translate message and field names\n"
-			+ "  --protobufVersion=2|3           : if generating protobuf, choose the version (2 or 3)\n"
 			+ "  --typeInEnums=true|false        : include type as a prefix in enums, defaults to true\n"
 			+ "  --includeMessageDocs=true|false : include documentation of messages in output, defaults to true\n"
 			+ "  --includeFieldDocs=true|false   : include documentation for fields in output, defaults to true\n" + "";
@@ -83,7 +80,6 @@ public class Main {
 		HashMap<String, String> map;
 		String xsd, param;
 		int i;
-		int protobufVersion = 2;
 		ProtobufMarshaller pbm = null;
 
 		OutputWriter writer;
@@ -123,8 +119,6 @@ public class Main {
 				try (InputStream in = Files.newInputStream(Paths.get(configFile))) {
 					LOGGER.info("Using configFile {}", configFile);
 					ConfigFile config = yaml.loadAs(in, ConfigFile.class);
-
-					pbm.setProtobufVersion(config.protobufVersion);
 
 					writer.setFilename(config.filename);
 					writer.setDirectory(config.directory);
@@ -195,11 +189,6 @@ public class Main {
 						param = args[i].split("=")[1];
 						boolean nestEnums = Boolean.valueOf(param);
 						xp.setNestEnums(nestEnums);
-					} else if (args[i].startsWith("--protobufVersion=")) {
-						protobufVersion = Integer.parseInt(args[i].split("=")[1]);
-						xp.setEnumOrderStart(0);
-						pbm.setProtobufVersion(protobufVersion);
-
 					} else if (args[i].startsWith("--typeInEnums=")) {
 						xp.setTypeInEnums(Boolean.parseBoolean(args[i].split("=")[1]));
 					} else if (args[i].startsWith("--includeMessageDocs=")) {

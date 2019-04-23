@@ -1,40 +1,42 @@
+syntax = "proto3";
+
 package default;
 
 message UnspecifiedType
 {
-	required string base_object_type = 1;
-	required bytes object = 2;
+	string base_object_type = 1;
+	bytes object = 2;
 }
 
 message Datatypes
 {
-	required string a__n_m_t_o_k_e_n = 1;
-	required string a__n_m_t_o_k_e_n_s = 2;
-	required bytes a_base64_binary = 3;
-	required bool a_boolean = 4;
-	required bytes a_byte = 5;
-	required string a_date = 6;
-	required string a_date_time = 7;
-	required double a_decimal = 8;
-	required double a_double = 9;
-	required float a_float = 10;
-	required bytes a_hex_binary = 11;
-	required int64 a_long = 12;
-	required sint64 a_negative_integer = 13;
-	required int64 a_non_negative_integer = 14;
-	required sint64 a_non_positive_integer = 15;
-	required int64 a_positive_integer = 16;
-	required int32 a_short = 17;
-	required string an__i_d = 18;
-	required string an__i_d_r_e_f = 19;
-	required UnspecifiedType an_any_simple_type = 20;
-	required UnspecifiedType an_any_type = 21;
-	required UnspecifiedType an_any_u_r_i = 22;
-	required int32 an_int = 23;
-	required int64 an_integer = 24;
-	required uint32 an_unsigned_byte = 25;
-	required uint32 an_unsigned_int = 26;
-	required uint64 an_unsigned_long = 27;
-	required uint32 an_unsigned_short = 28;
+	string a__n_m_t_o_k_e_n = 1;
+	string a__n_m_t_o_k_e_n_s = 2;
+	bytes a_base64_binary = 3;
+	bool a_boolean = 4;
+	bytes a_byte = 5;
+	string a_date = 6;
+	string a_date_time = 7;
+	double a_decimal = 8;
+	double a_double = 9;
+	float a_float = 10;
+	bytes a_hex_binary = 11;
+	int64 a_long = 12;
+	sint64 a_negative_integer = 13;
+	int64 a_non_negative_integer = 14;
+	sint64 a_non_positive_integer = 15;
+	int64 a_positive_integer = 16;
+	int32 a_short = 17;
+	string an__i_d = 18;
+	string an__i_d_r_e_f = 19;
+	UnspecifiedType an_any_simple_type = 20;
+	UnspecifiedType an_any_type = 21;
+	UnspecifiedType an_any_u_r_i = 22;
+	int32 an_int = 23;
+	int64 an_integer = 24;
+	uint32 an_unsigned_byte = 25;
+	uint32 an_unsigned_int = 26;
+	uint64 an_unsigned_long = 27;
+	uint32 an_unsigned_short = 28;
 }
 

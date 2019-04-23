@@ -26,7 +26,6 @@ package com.github.tranchis.xsd2thrift.marshal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,7 +35,6 @@ public class ProtobufMarshaller   {
 	private HashMap<Pattern, String> typeMapping;
 	private HashMap<Pattern, String> nameMapping;
 	private String indent = "";
-	private int version = 2;
 	private HashMap<String, String> imports;
 
 	public ProtobufMarshaller() {
@@ -89,21 +87,21 @@ public class ProtobufMarshaller   {
 
 	
 	public String writeHeader(String namespace) {
-		String res;
+		
+		StringBuilder b = new StringBuilder();
+		
+		// Syntax
+		b.append("syntax = \"proto3\";\n\n");
+		b.append("package ");
+		b.append( escapeNamespace(namespace));
+		b.append(";\n\n");
 
-		if (namespace != null && !namespace.isEmpty()) {
-			res = "package " + namespace + ";\n\n";
-		} else {
-			res = "";
-		}
-
-		if (version == 3) {
-			res += "syntax = \"proto3\";\n\n";
-		}
-
-		return res;
+		return b.toString();
 	}
 
+	public String escapeNamespace(String namespace) {
+		return namespace.replaceAll("\\.([0-9])", "_$1");
+	}
 	
 	public String writeEnumHeader(String name) {
 		final String result = writeIndent() + "enum " + name + "\n"
@@ -135,34 +133,17 @@ public class ProtobufMarshaller   {
 			boolean repeated, String name, String type, String fieldDocumentation) {
 		String sRequired = "";
 
-		// Only versions prior to 3 have required/optional
-		if (version < 3) {
-			sRequired = getRequired(required, repeated) + " ";
-		} else {
+	
 			if (repeated) {
 				sRequired = "repeated ";
 			}
-		}
+		
 
 		return writeIndent() + sRequired + type + " " + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name) + " = "
 				+ order + ";" + (fieldDocumentation != null ? " // "+fieldDocumentation:"") + "\n";
 	}
 
-	private String getRequired(boolean required, boolean repeated) {
-		String res;
-
-		if (repeated) {
-			res = "repeated";
-		} else {
-			if (required) {
-				res = "required";
-			} else {
-				res = "optional";
-			}
-		}
-
-		return res;
-	}
+	
 
 	
 	public String writeStructFooter() {
@@ -247,11 +228,6 @@ public class ProtobufMarshaller   {
 		}
 	}
 
-	public void setProtobufVersion(int version) {
-		 this.version = version;
-	}
-
-	
 	public String getImport(String typeName) {
 		if (imports != null) {
 			return imports.get(getTypeMapping(typeName));
