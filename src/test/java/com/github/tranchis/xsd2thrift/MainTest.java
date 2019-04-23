@@ -3,45 +3,46 @@ package com.github.tranchis.xsd2thrift;
 import static com.github.tranchis.xsd2thrift.TestHelper.compareExpectedAndGenerated;
 import static com.github.tranchis.xsd2thrift.TestHelper.generateProtobuf;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import java.io.IOException;
+
+import org.junit.jupiter.api.Test;
 
 public class MainTest {
 
 	
 	@Test
-	public void compareAtomProtobuf() {
+	public void compareAtomProtobuf() throws IOException {
 		compareExpectedAndGenerated("src/test/resources/expectedproto/atom.proto",
 				generateProtobuf("atom"));
 	}
 
-	@Ignore
-	public void compareRecipeProtobuf() {
+	//@Ignore
+	public void compareRecipeProtobuf() throws IOException {
 		compareExpectedAndGenerated("src/test/resources/expectedproto/recipe.proto",
 				generateProtobuf("recipe"));
 	}
 
 	@Test
-	public void compareShiporderProtobuf() {
+	public void compareShiporderProtobuf() throws IOException {
 		compareExpectedAndGenerated("src/test/resources/expectedproto/shiporder.proto",
 				generateProtobuf("shiporder"));
 	}
 
 	@Test
-	public void compareTestChoiceProtobuf() {
+	public void compareTestChoiceProtobuf()  throws IOException {
 		compareExpectedAndGenerated("src/test/resources/expectedproto/test-choice.proto",
 				generateProtobuf("test-choice"));
 	}
 
 	@Test
-	public void compareTestDatatypesProtobuf() {
+	public void compareTestDatatypesProtobuf() throws IOException {
 		compareExpectedAndGenerated(
 				"src/test/resources/expectedproto/test-datatypes.proto",
 				generateProtobuf("test-datatypes"));
 	}
 
 	@Test
-	public void compareTestDatatypesStringDatesProtobuf() {
+	public void compareTestDatatypesStringDatesProtobuf()  throws IOException{
 		compareExpectedAndGenerated(
 				"src/test/resources/expectedproto/test-datatypes-string-dates.proto",
 				generateProtobuf("test-datatypes-string-dates",
@@ -49,48 +50,47 @@ public class MainTest {
 	}
 
 	@Test
-	public void compareTestExtensionProtobuf() {
+	public void compareTestExtensionProtobuf()  throws IOException{
 		compareExpectedAndGenerated(
 				"src/test/resources/expectedproto/test-extension.proto",
 				generateProtobuf("test-extension"));
 	}
 
 	@Test
-	public void compareTestExtensionAttributesProtobuf() {
+	public void compareTestExtensionAttributesProtobuf() throws IOException {
 		compareExpectedAndGenerated(
 				"src/test/resources/expectedproto/test-extension-attributes.proto",
 				generateProtobuf("test-extension-attributes"));
 	}
 
 	@Test
-	public void compareTestOptionalProtobuf() {
+	public void compareTestOptionalProtobuf() throws IOException {
 		compareExpectedAndGenerated(
 				"src/test/resources/expectedproto/test-optional.proto",
 				generateProtobuf("test-optional"));
 	}
 
 	@Test
-	public void compareTestRangeProtobuf() {
+	public void compareTestRangeProtobuf() throws IOException {
 		compareExpectedAndGenerated("src/test/resources/expectedproto/test-range.proto",
 				generateProtobuf("test-range"));
 	}
 
-	@Ignore("Order seems to change on the test run")
-	public void compareXmlRecipemlProtobuf() {
+//	@Ignore("Order seems to change on the test run")
+	public void compareXmlRecipemlProtobuf()  throws IOException{
 		compareExpectedAndGenerated(
 				"src/test/resources/expectedproto/xml-recipeml.proto",
 				generateProtobuf("xml-recipeml"));
 	}
 
-	@Ignore("Order seems to change on the test run")
-	public void compareRecipemlProtobuf() {
+//	@Ignore("Order seems to change on the test run")
+	public void compareRecipemlProtobuf()  throws IOException{
 		compareExpectedAndGenerated("src/test/resources/expectedproto/recipeml.proto",
 				generateProtobuf("recipeml"));
 	}
 
-	@Test
-	@Ignore("Implementation not yet complete")
-	public void fieldAndMessageRenaming() {
+	//@Test
+	public void fieldAndMessageRenaming() throws IOException {
 		compareExpectedAndGenerated(
 				"src/test/resources/expectedproto/complexTypeRenaming.proto",
 				generateProtobuf("complexTypeRenaming",null,

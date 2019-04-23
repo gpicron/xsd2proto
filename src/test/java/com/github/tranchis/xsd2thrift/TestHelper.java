@@ -1,5 +1,7 @@
 package com.github.tranchis.xsd2thrift;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -7,26 +9,76 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Assert;
+import org.apache.commons.lang3.StringUtils;
+import org.opentest4j.AssertionFailedError;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.github.difflib.DiffUtils;
+import com.github.difflib.algorithm.DiffException;
+import com.github.difflib.patch.AbstractDelta;
+import com.github.difflib.patch.Patch;
 
 public class TestHelper {
 
-	public static void compareExpectedAndGenerated(String expected, String generated) {
-		try {
-			List<String> exlines = linesFromFile(expected);
-			List<String> genlines = linesFromFile(generated);
+	private static final Logger LOGGER = LoggerFactory.getLogger(TestHelper.class);
+	private static final Logger FILECONTENTLOGGER = LoggerFactory.getLogger("FILECONTENT");
 
-			for (int i = 0; i < exlines.size(); i++) {
-				String exline = exlines.get(i);
-				String genline = null;
-				if (genlines.size() > i)
-					genline = genlines.get(i);
-				Assert.assertEquals("Unexpected difference between " + expected + " and " + generated + " on line " + i, exline, genline);
-			}
-		} catch (Exception e) {
-			Assert.fail("Failure while comparing " + expected + " and " + generated);
-			e.printStackTrace();
+	public static void compareExpectedAndGenerated(String expected, String generated) throws IOException {
+
+		File e = new File(expected);
+		File g = new File(generated);
+
+		List<String> exlines = linesFromFile(expected);
+		List<String> genlines = linesFromFile(generated);
+
+		try {
+			ProtoComparator.compareProtoFiles(e, g);
+		} catch (AssertionFailedError e1) {
+			showDiff(expected, generated, exlines, genlines);
+
+			throw e1;
 		}
+
+		// Old line by line comparison
+		for (int i = 0; i < exlines.size(); i++) {
+			String exline = exlines.get(i);
+			String genline = null;
+			if (genlines.size() > i)
+				genline = genlines.get(i);
+			assertEquals(exline, genline, "Unexpected difference between " + expected + " and " + generated + " on line " + i);
+		}
+	}
+
+	private static void showDiff(String expected, String generated, List<String> exlines, List<String> genlines) {
+		try {
+			Patch<String> patch = DiffUtils.diff(exlines, genlines);
+
+			// simple output the computed patch to console
+			if (patch.getDeltas().size() > 0) {
+				
+				dumpFile(expected, exlines);
+				dumpFile(generated, genlines);
+				
+				FILECONTENTLOGGER.info("Diff between {} and {}", expected, generated);
+				for (AbstractDelta<String> delta : patch.getDeltas()) {
+					FILECONTENTLOGGER.info(delta.getSource() + " <----> " + delta.getTarget());
+				}
+				FILECONTENTLOGGER.info("Diff end");
+			}
+
+		} catch (DiffException e1) {
+			LOGGER.error("Error creating diff of files", e1);
+		}
+	}
+
+	private static void dumpFile(String filename, List<String> exlines) {
+		FILECONTENTLOGGER.info("****** START "+filename+" ******");
+		int i=0;
+		for(String s : exlines) {
+			FILECONTENTLOGGER.info("["+StringUtils.leftPad(""+i++,4," ")+"] "+s);
+		}
+		FILECONTENTLOGGER.info("****** END   "+filename+" ******");
 	}
 
 	public static String generateProtobuf(String name, String typeMappings, String nameMappings) {
@@ -42,18 +94,18 @@ public class TestHelper {
 		if (!dir.exists())
 			dir.mkdir();
 		String filename = "target/generated-proto/" + name + "." + extension;
-		
+
 		List<String> args = new ArrayList<>();
-		args.add( "--filename=" + filename);
+		args.add("--filename=" + filename);
 		args.add("--package=default");
-		if(typeMappings != null) {
+		if (typeMappings != null) {
 			args.add("--customTypeMappings=" + typeMappings);
 		}
-		if(nameMappings != null) {
+		if (nameMappings != null) {
 			args.add("--customNameMappings=" + nameMappings);
 		}
 		args.add("src/test/resources/xsd/" + name + ".xsd");
-		
+
 		Main.main(args.toArray(new String[0]));
 
 		return filename;

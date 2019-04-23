@@ -1,18 +1,19 @@
 package com.github.tranchis.xsd2thrift;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import static com.github.tranchis.xsd2thrift.TestHelper.compareExpectedAndGenerated;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
+import java.io.IOException;
 
-import static com.github.tranchis.xsd2thrift.TestHelper.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class MultipleNamespaceTest {
     
  
 
-    @BeforeClass
+    @BeforeAll
     public static void generateProtobufForTests(){
         try {
         	new File("target/generated-proto").mkdirs();
@@ -23,19 +24,19 @@ public class MultipleNamespaceTest {
         }
     }
     @Test
-    public void shouldCreateANamespacedProtobufPersonFile(){
+    public void shouldCreateANamespacedProtobufPersonFile() throws IOException{
         compareExpectedAndGenerated(
                 "src/test/resources/expectedproto/schemas_com_domain_person.proto",
                 "target/generated-proto/schemas_com_domain_person.proto");
     }
     @Test
-    public void shouldCreateANamespacedProtobufCommonFile(){
+    public void shouldCreateANamespacedProtobufCommonFile() throws IOException{
         compareExpectedAndGenerated(
                 "src/test/resources/expectedproto/schemas_com_domain_common.proto",
                 "target/generated-proto/schemas_com_domain_common.proto");
     }
     @Test
-    public void shouldCreateANamespacedProtobufAddressFile(){
+    public void shouldCreateANamespacedProtobufAddressFile() throws IOException{
         compareExpectedAndGenerated(
                 "src/test/resources/expectedproto/schemas_com_domain_address.proto",
                 "target/generated-proto/schemas_com_domain_address.proto");
