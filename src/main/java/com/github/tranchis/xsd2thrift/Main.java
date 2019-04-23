@@ -130,10 +130,10 @@ public class Main {
 					writer.setSplitBySchema(config.splitBySchema);
 
 					customTypeMappings = new HashMap<>();
-					customTypeMappings.putAll(config.customTypeMappings);
+					customTypeMappings.putAll(config.customTypeMappingsMap);
 
 					customNameMappings = new HashMap<>();
-					customNameMappings.putAll(config.customNameMappings);
+					customNameMappings.putAll(config.customNameMappingsMap);
 
 					xp.setNestEnums(config.nestEnums);
 					xp.setEnumOrderStart(0);
@@ -208,8 +208,11 @@ public class Main {
 			}
 
 			
-			 if (customTypeMappings != null) {
-				pbm.setCustomMappings(customTypeMappings);
+			if (customTypeMappings != null) {
+				pbm.setCustomTypeMappings(customTypeMappings);
+			}
+			if (customNameMappings != null) {
+				pbm.setCustomNameMappings(customNameMappings);
 			}
 
 			if (correct) {

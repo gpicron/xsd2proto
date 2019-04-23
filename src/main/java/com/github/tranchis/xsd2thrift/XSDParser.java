@@ -276,12 +276,12 @@ public class XSDParser implements ErrorHandler {
 
 		writeMessageDocumentation(st.getName(), st.getNamespace());
 
-		String messageName = st.getName();/*
-		String mappedMessageName = marshaller.getTypeMapping(messageName) ;
-		if(mappedMessageName != null) {
-			messageName = mappedMessageName;
+		String messageName = st.getName();
+
+		if(marshaller.getNameMapping(messageName) != null) {
+			messageName = marshaller.getNameMapping(messageName);
 		}
-	*/	
+
 		os(st.getNamespace()).write(
 				marshaller.writeStructHeader(escape(messageName)).getBytes());
 		itf = orderedIteratorForFields(st.getFields());
@@ -325,6 +325,11 @@ public class XSDParser implements ErrorHandler {
 					&& !f.getTypeNamespace().equals(st.getNamespace())) {
 				typeNameSpace = f.getTypeNamespace() + ".";
 				writer.addInclusion(st.getNamespace(), f.getTypeNamespace());
+			}
+
+			if (marshaller.getNameMapping(type) != null) {
+				//Message-type has been overridden, need to override all usage
+				type = marshaller.getNameMapping(type);
 			}
 
 			type = typeNameSpace + escapeType(type);
