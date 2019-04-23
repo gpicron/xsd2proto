@@ -89,7 +89,7 @@ public class MainTest {
 				generateProtobuf("recipeml"));
 	}
 
-	//@Test
+	@Test
 	public void fieldAndMessageRenaming() throws IOException {
 		compareExpectedAndGenerated(
 				"src/test/resources/expectedproto/complexTypeRenaming.proto",
