@@ -1,7 +1,5 @@
 package com.github.tranchis.xsd2thrift;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -38,15 +36,6 @@ public class TestHelper {
 			showDiff(expected, generated, exlines, genlines);
 
 			throw e1;
-		}
-
-		// Old line by line comparison
-		for (int i = 0; i < exlines.size(); i++) {
-			String exline = exlines.get(i);
-			String genline = null;
-			if (genlines.size() > i)
-				genline = genlines.get(i);
-			assertEquals(exline, genline, "Unexpected difference between " + expected + " and " + generated + " on line " + i);
 		}
 	}
 

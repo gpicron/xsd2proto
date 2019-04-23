@@ -528,6 +528,11 @@ public class XSDParser implements ErrorHandler {
 	 */
 	private String processSimpleType(XSSimpleType xs, String elementName) {
 
+		if(elementName != null && marshaller.getNameMapping(elementName) != null) {
+			elementName = marshaller.getNameMapping(elementName);
+		}
+
+		
 		String typeName = xs.getName();
 		String namespace = xs.getTargetNamespace();
 
@@ -578,6 +583,11 @@ public class XSDParser implements ErrorHandler {
 		XSType parent;
 		String typeName = cType.getName();
 		String nameSpace = cType.getTargetNamespace();
+
+		if(elementName != null && marshaller.getNameMapping(elementName) != null) {
+			elementName = marshaller.getNameMapping(elementName);
+		}
+
 		if (typeName == null) {
 			typeName = elementName != null ? elementName + "Type"
 					: generateAnonymousName();
