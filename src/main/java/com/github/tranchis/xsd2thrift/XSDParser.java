@@ -290,6 +290,10 @@ public class XSDParser implements ErrorHandler {
 		while (itf.hasNext()) {
 			f = itf.next();
 			fname = f.getName();
+			if(marshaller.getNameMapping(fname) != null) {
+				fname = marshaller.getNameMapping(fname);
+			}
+			
 			type = f.getType();
 
 			if (isNestEnums() && marshaller.isNestedEnums()

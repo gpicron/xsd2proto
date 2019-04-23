@@ -7,5 +7,5 @@ message ElementListNewName
 
 message ComplexTypeNewName
 {
-	repeated string ElementInListNewName = 1;
+	repeated string element_in_list_new_name = 1;
 }
