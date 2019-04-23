@@ -81,15 +81,15 @@ public class TestHelper {
 		FILECONTENTLOGGER.info("****** END   "+filename+" ******");
 	}
 
-	public static String generateProtobuf(String name, String typeMappings, String nameMappings) {
-		return generate(name, "protobuf", "proto", typeMappings, nameMappings);
+	public static String generateProtobuf(String name, String typeMappings, String nameMappings, String packageName) {
+		return generate(name, "protobuf", "proto", typeMappings, nameMappings, packageName);
 	}
 
 	public static String generateProtobuf(String name) {
-		return generate(name, "protobuf", "proto", "a:a", null);
+		return generate(name, "protobuf", "proto", "a:a", null, "default");
 	}
 
-	private static String generate(String name, String type, String extension, String typeMappings, String nameMappings) {
+	private static String generate(String name, String type, String extension, String typeMappings, String nameMappings, String packageName) {
 		File dir = new File("target/generated-proto/");
 		if (!dir.exists())
 			dir.mkdir();
@@ -97,7 +97,7 @@ public class TestHelper {
 
 		List<String> args = new ArrayList<>();
 		args.add("--filename=" + filename);
-		args.add("--package=default");
+		args.add("--package="+packageName);
 		if (typeMappings != null) {
 			args.add("--customTypeMappings=" + typeMappings);
 		}
