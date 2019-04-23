@@ -38,16 +38,16 @@ import org.yaml.snakeyaml.Yaml;
 import com.github.tranchis.xsd2thrift.marshal.ProtobufMarshaller;
 
 public class Main {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
 	private static boolean correct;
-	private static String usage = ""
+	private static String usage = "" 
 			+ "Usage: java xsd2proto-<VERSION>.jar [--output=FILENAME]\n"
-			+ "                           [--package=NAME] filename.xsd\n"
-			+ "\n"
+			+ "                           [--package=NAME] filename.xsd\n" 
+			+ "\n" 
 			+ "  --configFile=FILENAME           : path to configuration file\n"
-			+ "\nOR\n"
+			+ "\nOR\n" 
 			+ "\n"
 			+ "  --filename=FILENAME             : store the result in FILENAME instead of standard output\n"
 			+ "  --package=NAME                  : set namespace/package of the output file\n"
@@ -58,8 +58,7 @@ public class Main {
 			+ "  --protobufVersion=2|3           : if generating protobuf, choose the version (2 or 3)\n"
 			+ "  --typeInEnums=true|false        : include type as a prefix in enums, defaults to true\n"
 			+ "  --includeMessageDocs=true|false : include documentation of messages in output, defaults to true\n"
-			+ "  --includeFieldDocs=true|false   : include documentation for fields in output, defaults to true\n"
-			+ "";
+			+ "  --includeFieldDocs=true|false   : include documentation for fields in output, defaults to true\n" + "";
 
 	private static void usage(String error) {
 		LOGGER.error(error);
@@ -75,17 +74,16 @@ public class Main {
 	 * @param args
 	 * @throws Exception
 	 */
-	public static void main(String[] args)   {
+	public static void main(String[] args) {
 		XSDParser xp;
 		TreeMap<String, String> map;
 		String xsd, param;
 		int i;
 		int protobufVersion = 2;
 		ProtobufMarshaller pbm = null;
-	
+
 		OutputWriter writer;
 		correct = true;
-		
 
 		map = new TreeMap<String, String>();
 		map.put("schema_._type", "binary");
@@ -106,9 +104,8 @@ public class Main {
 			writer = new OutputWriter();
 			xp.setWriter(writer);
 
-
 			pbm = new ProtobufMarshaller();
-			
+
 			xp.addMarshaller(pbm);
 			writer.setMarshaller(pbm);
 			writer.setDefaultExtension("proto");
@@ -120,6 +117,7 @@ public class Main {
 				Yaml yaml = new Yaml();
 				String configFile = args[0].split("=")[1];
 				try (InputStream in = Files.newInputStream(Paths.get(configFile))) {
+					LOGGER.info("Using configFile {}", configFile);
 					ConfigFile config = yaml.loadAs(in, ConfigFile.class);
 
 					pbm.setProtobufVersion(config.protobufVersion);
@@ -130,18 +128,21 @@ public class Main {
 					writer.setSplitBySchema(config.splitBySchema);
 
 					customTypeMappings = new HashMap<>();
-					customTypeMappings.putAll(config.customTypeMappingsMap);
+					if (config.customTypeMappings != null) {
+						customTypeMappings.putAll(config.customTypeMappings);
+					}
 
 					customNameMappings = new HashMap<>();
-					customNameMappings.putAll(config.customNameMappingsMap);
-
+					if (config.customNameMappings != null) {
+						customNameMappings.putAll(config.customNameMappings);
+					}
 					xp.setNestEnums(config.nestEnums);
 					xp.setEnumOrderStart(0);
 					xp.setTypeInEnums(config.typeInEnums);
 					xp.setIncludeMessageDocs(config.includeMessageDocs);
 					xp.setIncludeFieldDocs(config.includeFieldDocs);
 				} catch (IOException e) {
-					LOGGER.error("Unable to find config file "+configFile,e);
+					LOGGER.error("Unable to find config file " + configFile, e);
 				}
 			} else {
 				i = 0;
@@ -164,11 +165,9 @@ public class Main {
 						for (String mapping : param.split(",")) {
 							int colon = mapping.indexOf(':');
 							if (colon > -1) {
-								customTypeMappings.put(mapping.substring(0, colon),
-										mapping.substring(colon + 1));
+								customTypeMappings.put(mapping.substring(0, colon), mapping.substring(colon + 1));
 							} else {
-								usage(mapping
-										+ " is not a valid custom tyope mapping - use schematype:outputtype");
+								usage(mapping + " is not a valid custom tyope mapping - use schematype:outputtype");
 							}
 						}
 					} else if (args[i].startsWith("--customNameMappings=")) {
@@ -177,11 +176,9 @@ public class Main {
 						for (String mapping : param.split(",")) {
 							int colon = mapping.indexOf(':');
 							if (colon > -1) {
-								customNameMappings.put(mapping.substring(0, colon),
-										mapping.substring(colon + 1));
+								customNameMappings.put(mapping.substring(0, colon), mapping.substring(colon + 1));
 							} else {
-								usage(mapping
-										+ " is not a valid custom name mapping - use originalname:newname");
+								usage(mapping + " is not a valid custom name mapping - use originalname:newname");
 							}
 						}
 					} else if (args[i].startsWith("--nestEnums=")) {
@@ -192,7 +189,7 @@ public class Main {
 						protobufVersion = Integer.parseInt(args[i].split("=")[1]);
 						xp.setEnumOrderStart(0);
 						pbm.setProtobufVersion(protobufVersion);
-						
+
 					} else if (args[i].startsWith("--typeInEnums=")) {
 						xp.setTypeInEnums(Boolean.parseBoolean(args[i].split("=")[1]));
 					} else if (args[i].startsWith("--includeMessageDocs=")) {
@@ -207,7 +204,6 @@ public class Main {
 				}
 			}
 
-			
 			if (customTypeMappings != null) {
 				pbm.setCustomTypeMappings(customTypeMappings);
 			}
@@ -218,10 +214,11 @@ public class Main {
 			if (correct) {
 				try {
 					xp.parse();
+					LOGGER.info("Done");
 				} catch (InvalidXSDException e) {
-					LOGGER.error("Error converting xsd to proto: {}",e.getMessage());
+					LOGGER.error("Error converting xsd to proto: {}", e.getMessage());
 				} catch (Exception e) {
-					LOGGER.error("Error parsing xsd",e);
+					LOGGER.error("Error parsing xsd", e);
 				}
 			}
 		}
