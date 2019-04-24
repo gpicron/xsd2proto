@@ -100,6 +100,9 @@ public class ProtobufMarshaller   {
 	}
 
 	public String escapeNamespace(String namespace) {
+		if (namespace == null) {
+			return null;
+		}
 		return namespace.replaceAll("\\.([0-9])", "_$1");
 	}
 	
