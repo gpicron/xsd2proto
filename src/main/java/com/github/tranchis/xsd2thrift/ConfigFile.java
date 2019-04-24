@@ -3,7 +3,6 @@ package com.github.tranchis.xsd2thrift;
 import java.util.Map;
 
 public class ConfigFile {
-	public int protobufVersion = 3;
 	public String filename;
 	public String directory;
 	public String namespace;
