@@ -27,7 +27,7 @@ import java.util.*;
 
 import com.sun.xml.xsom.XmlString;
 
-public class Struct implements Comparable<Struct>
+public class Message implements Comparable<Message>
 {
 	private Map<String,Field>	map;
 	private Set<String>			types;
@@ -37,7 +37,7 @@ public class Struct implements Comparable<Struct>
 	private String				parent;
 	private String				doc;
 
-	public Struct(String name, String namespace)
+	public Message(String name, String namespace)
 	{
 		this.name = name;
 		this.namespace = namespace;
@@ -142,7 +142,7 @@ public class Struct implements Comparable<Struct>
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Struct other = (Struct) obj;
+        Message other = (Message) obj;
         if (name == null) {
             if (other.name != null)
                 return false;
@@ -156,7 +156,7 @@ public class Struct implements Comparable<Struct>
 	}
 
 	@Override
-	public int compareTo(Struct s) {
+	public int compareTo(Message s) {
 		return name.compareTo(s.name);
 	}
 

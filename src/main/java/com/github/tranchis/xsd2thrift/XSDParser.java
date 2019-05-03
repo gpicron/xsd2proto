@@ -48,7 +48,7 @@ public class XSDParser implements ErrorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(XSDParser.class);
 
 	private File f;
-	private TreeMap<String, Struct> map;
+	private TreeMap<String, Message> map;
 	private Map<String, Enumeration> enums;
 	private Map<String, String> simpleTypes;
 	private Map<String, String> documentation;
@@ -70,7 +70,7 @@ public class XSDParser implements ErrorHandler {
 	private void init(String stFile) {
 
 		this.f = new File(stFile);
-		map = new TreeMap<String, Struct>();
+		map = new TreeMap<String, Message>();
 		enums = new HashMap<String, Enumeration>();
 		simpleTypes = new HashMap<String, String>();
 		documentation = new HashMap<String, String>();
@@ -157,9 +157,9 @@ public class XSDParser implements ErrorHandler {
 	}
 
 	private void writeMap() throws Exception {
-		Iterator<Struct> its;
-		Struct st;
-		Set<Struct> ss;
+		Iterator<Message> its;
+		Message st;
+		Set<Message> ss;
 		Set<String> declared;
 		Iterator<String> ite;
 		boolean bModified;
@@ -171,7 +171,7 @@ public class XSDParser implements ErrorHandler {
 			}
 		}
 
-		ss = new TreeSet<Struct>(map.values());
+		ss = new TreeSet<Message>(map.values());
 		declared = new TreeSet<String>(basicTypes);
 		declared.addAll(enums.keySet());
 		declared.addAll(simpleTypes.keySet());
@@ -192,7 +192,7 @@ public class XSDParser implements ErrorHandler {
 			// Check if we are missing a type or it's a circular dependency
 			Set<String> requiredTypes = new TreeSet<String>();
 			Set<String> notYetDeclaredTypes = new TreeSet<String>();
-			for (Struct s : ss) {
+			for (Message s : ss) {
 				requiredTypes.addAll(s.getTypes());
 				notYetDeclaredTypes.add(s.getName());
 			}
@@ -202,13 +202,13 @@ public class XSDParser implements ErrorHandler {
 				// Circular dependencies have been detected
 				if (marshaller.isCircularDependencySupported()) {
 					// Just dump the rest
-					for (Struct s : ss) {
+					for (Message s : ss) {
 						writeStruct(s, declared);
 					}
 				} else {
 					// Report circular dependency
 					LOGGER.error("Source schema contains circular dependencies and the target marshaller does not support them. Refer to the reduced dependency graph below.");
-					for (Struct s : ss) {
+					for (Message s : ss) {
 						s.getTypes().removeAll(declared);
 						LOGGER.error(s.getName() + ": " + s.getTypes());
 					}
@@ -217,7 +217,7 @@ public class XSDParser implements ErrorHandler {
 			} else {
 				// Missing types have been detected
 				LOGGER.error("Source schema contains references missing types");
-				for (Struct s : ss) {
+				for (Message s : ss) {
 					s.getTypes().retainAll(requiredTypes);
 					if (!s.getTypes().isEmpty()) {
 						LOGGER.error(s.getName() + ": " + s.getTypes());
@@ -228,7 +228,7 @@ public class XSDParser implements ErrorHandler {
 		}
 	}
 
-	private void writeStruct(Struct st, Set<String> declared)
+	private void writeStruct(Message st, Set<String> declared)
 			throws IOException {
 		Iterator<Field> itf;
 		Field f;
@@ -577,7 +577,7 @@ public class XSDParser implements ErrorHandler {
 	 */
 	private String processComplexType(XSComplexType cType, String elementName,
 			XSSchemaSet sset) {
-		Struct st = null;
+		Message st = null;
 		XSType parent;
 		String typeName = cType.getName();
 		String nameSpace = cType.getTargetNamespace();
@@ -597,7 +597,7 @@ public class XSDParser implements ErrorHandler {
 		st = map.get(typeName);
 		if (st == null && !basicTypes.contains(typeName)) {
 
-			st = new Struct(typeName,
+			st = new Message(typeName,
 					NamespaceConverter.convertFromSchema(nameSpace));
 			st.setDoc(doc);
 
@@ -640,17 +640,17 @@ public class XSDParser implements ErrorHandler {
 			parent = cType;
 			while (parent != sset.getAnyType()) {
 				if (parent.isComplexType()) {
-					Struct parentStruct = null;
+					Message parentMessage = null;
 					if (parent.getName() != null) {
-						parentStruct = map.get(parent.getName());
+						parentMessage = map.get(parent.getName());
 					}
-					if (parentStruct == null && ((ComplexTypeImpl) parent).getScope() != null) {
-						parentStruct = map.get(((ComplexTypeImpl) parent).getScope().getName());
+					if (parentMessage == null && ((ComplexTypeImpl) parent).getScope() != null) {
+						parentMessage = map.get(((ComplexTypeImpl) parent).getScope().getName());
 					}
 
 
-					if (parentStruct != null) {
-						List<Field> parentStructFields = parentStruct.getFields();
+					if (parentMessage != null) {
+						List<Field> parentStructFields = parentMessage.getFields();
 						parentStructFields.removeIf(f -> f.getType() != null && f.getType().endsWith("/XMLSchema"));
 						st.addFields(parentStructFields, xsdMapping);
 					}
