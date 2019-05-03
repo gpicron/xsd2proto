@@ -23,13 +23,7 @@
  */
 package com.github.tranchis.xsd2thrift;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 
 import com.sun.xml.xsom.XmlString;
 
@@ -41,8 +35,9 @@ public class Struct implements Comparable<Struct>
 	private String				name;
 	private String				namespace;
 	private String				parent;
+	private String				doc;
 
-	public Struct(String name,String namespace)
+	public Struct(String name, String namespace)
 	{
 		this.name = name;
 		this.namespace = namespace;
@@ -50,10 +45,15 @@ public class Struct implements Comparable<Struct>
 		types = new TreeSet<String>();
 		orderedFields = new LinkedList<Field>();
 	}
-    public void addField(String name, String type, boolean required, boolean repeat, XmlString def, Map<String, String> xsdMapping){
-        addField(name, null, type, required, repeat, def, xsdMapping);
+	void addFields(List<Field> fields, HashMap<String, String> xsdMapping) {
+		for (Field field : fields) {
+			addField(field.getName(), field.getTypeNamespace(), field.getType(), field.isRequired(), field.isRepeat(), field.getDef(), field.getDoc(), xsdMapping);
+		}
+	}
+    public void addField(String name, String type, boolean required, boolean repeat, XmlString def, String doc, Map<String, String> xsdMapping){
+        addField(name, null, type, required, repeat, def, doc, xsdMapping);
     }
-	public void addField(String name, String namespace, String type, boolean required, boolean repeat, XmlString def, Map<String, String> xsdMapping)
+	public void addField(String name, String namespace, String type, boolean required, boolean repeat, XmlString def, String doc, Map<String, String> xsdMapping)
 	{
 		Field	f;
 		
@@ -74,7 +74,7 @@ public class Struct implements Comparable<Struct>
 					type = "binary";
 				}
 			}
-			f = new Field(name,NamespaceConverter.convertFromSchema(namespace), type, repeat, def, required);
+			f = new Field(name,NamespaceConverter.convertFromSchema(namespace), type, repeat, def, doc, required);
 			map.put(name, f);
 			orderedFields.add(f);
 			if(!type.equals(this.name))
@@ -92,6 +92,14 @@ public class Struct implements Comparable<Struct>
 	public void setName(String name)
 	{
 		this.name = name;
+	}
+
+	public String getDoc() {
+		return doc;
+	}
+
+	public void setDoc(String doc) {
+		this.doc = doc;
 	}
 
 	public List<Field> getFields()
@@ -151,5 +159,5 @@ public class Struct implements Comparable<Struct>
 	public int compareTo(Struct s) {
 		return name.compareTo(s.name);
 	}
-	
+
 }

@@ -30,11 +30,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import com.github.tranchis.xsd2thrift.marshal.ProtobufMarshaller;
 
@@ -120,6 +116,10 @@ public class OutputWriter {
         this.splitBySchema = splitBySchema;
     }
 
+    public boolean isSplitBySchema() {
+        return splitBySchema;
+    }
+
     public void setMarshaller(ProtobufMarshaller marshaller) {
         this.marshaller = marshaller;
     }
@@ -155,12 +155,27 @@ public class OutputWriter {
                     }
                 }
             }
+        } else {
+            if (inclusions!=null && !marshaller.imports.isEmpty()) {
+                Iterator<String> namespaces = inclusions.keySet().iterator();
+                Set<String> requiredImports = new HashSet<>();
+                while(namespaces.hasNext()){
+                    requiredImports.addAll(inclusions.get(namespaces.next()));
+
+                }
+                requiredImports.retainAll(marshaller.imports.values());
+
+                File f = new File(filename);
+                if (f.exists()) {
+                    writeIncludes(f, marshaller.imports.values());
+                }
+            }
         }
     }
 
 
 
-    private void writeIncludes(File f, Set<String> toInclude) throws IOException {
+    private void writeIncludes(File f, Collection<String> toInclude) throws IOException {
         Iterator<String> i = toInclude.iterator();
         BufferedReader reader = new BufferedReader(new FileReader(f));
         String line = null;

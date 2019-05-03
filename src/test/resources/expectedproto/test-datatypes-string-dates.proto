@@ -2,12 +2,6 @@ syntax = "proto3";
 
 package default;
 
-message UnspecifiedType
-{
-	string base_object_type = 1;
-	bytes object = 2;
-}
-
 message Datatypes
 {
 	string a__n_m_t_o_k_e_n = 1;
@@ -29,9 +23,9 @@ message Datatypes
 	int32 a_short = 17;
 	string an__i_d = 18;
 	string an__i_d_r_e_f = 19;
-	UnspecifiedType an_any_simple_type = 20;
-	UnspecifiedType an_any_type = 21;
-	UnspecifiedType an_any_u_r_i = 22;
+	string an_any_simple_type = 20;
+	string an_any_type = 21;
+	string an_any_u_r_i = 22;
 	int32 an_int = 23;
 	int64 an_integer = 24;
 	uint32 an_unsigned_byte = 25;

@@ -32,6 +32,7 @@ public class Enumeration
 	private String		name;
 	private Set<String>	strings;
 	private String		namespace;
+	private String		doc;
 
 	public Enumeration(String name,String namespace)
 	{
@@ -62,5 +63,13 @@ public class Enumeration
 
 	public String getNamespace() {
 		return namespace;
+	}
+
+	public String getDoc() {
+		return doc;
+	}
+
+	public void setDoc(String doc) {
+		this.doc = doc;
 	}
 }

@@ -2,12 +2,6 @@ syntax = "proto3";
 
 package org.myrecipies;
 
-message UnspecifiedType
-{
-	string base_object_type = 1;
-	bytes object = 2;
-}
-
 message ElementListNewNameType
 {
 	repeated ComplexTypeNewName element_in_list_of_complex_type_new_name = 1;

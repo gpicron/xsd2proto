@@ -2,13 +2,6 @@ syntax = "proto3";
 
 package schemas.com.domain.common;
 
-message UnspecifiedType
-{
-	string base_object_type = 1;
-	bytes object = 2;
-}
-
-
 /*
  * A country.  ISO3 code is the unique identifier.
  */

@@ -29,13 +29,15 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.github.tranchis.xsd2thrift.Field;
+import com.github.tranchis.xsd2thrift.NamespaceConverter;
 import com.google.common.base.CaseFormat;
 
 public class ProtobufMarshaller   {
 	private HashMap<Pattern, String> typeMapping;
 	private HashMap<Pattern, String> nameMapping;
 	private String indent = "";
-	private HashMap<String, String> imports;
+	public HashMap<String, String> imports;
 
 	public ProtobufMarshaller() {
 		typeMapping = new HashMap<>();
@@ -59,8 +61,8 @@ public class ProtobufMarshaller   {
 		typeMapping.put(Pattern.compile("^IDREF$"), "string");
 		typeMapping.put(Pattern.compile("^NMTOKEN$"), "string");
 		typeMapping.put(Pattern.compile("^NMTOKENS$"), "string"); // TODO: Fix this
-		typeMapping.put(Pattern.compile("^anySimpleType$"), "UnspecifiedType");
-		typeMapping.put(Pattern.compile("^anyType$"), "UnspecifiedType");
+		typeMapping.put(Pattern.compile("^anySimpleType$"), "string");
+		typeMapping.put(Pattern.compile("^anyType$"), "string");
 		typeMapping.put(Pattern.compile("^anyURI$"), "string");
 		typeMapping.put(Pattern.compile("^normalizedString$"), "string");
 		typeMapping.put(Pattern.compile("^boolean$"), "bool");
@@ -81,8 +83,8 @@ public class ProtobufMarshaller   {
 		nameMapping = new HashMap<>();
 
 		imports = new HashMap<String, String>();
-		imports.put("google.protobuf.Timestamp", "google/protobuf/timestamp.proto");
-		imports.put("google.protobuf.Duration", "google/protobuf/duration.proto");
+		imports.put("google.protobuf.Timestamp", "google/protobuf/timestamp");
+		imports.put("google.protobuf.Duration", "google/protobuf/duration");
 	}
 
 	
@@ -92,9 +94,12 @@ public class ProtobufMarshaller   {
 		
 		// Syntax
 		b.append("syntax = \"proto3\";\n\n");
-		b.append("package ");
-		b.append( escapeNamespace(namespace));
-		b.append(";\n\n");
+
+		if (namespace != null) {
+			b.append("package ");
+			b.append(escapeNamespace(namespace));
+			b.append(";\n\n");
+		}
 
 		return b.toString();
 	}
@@ -131,18 +136,31 @@ public class ProtobufMarshaller   {
 		return result;
 	}
 
-	
+
 	public String writeStructParameter(int order, boolean required,
-			boolean repeated, String name, String type, String fieldDocumentation) {
+			boolean repeated, String name, String type, String fieldDocumentation, boolean splitByNamespace) {
 		String sRequired = "";
 
+		if (fieldDocumentation != null) {
+			fieldDocumentation = fieldDocumentation
+										.replaceAll("\n", " ")
+										.replaceAll("\t", " ");
+		}
 	
-			if (repeated) {
-				sRequired = "repeated ";
-			}
-		
+		if (repeated) {
+			sRequired = "repeated ";
+		}
+		String fieldName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name);
 
-		return writeIndent() + sRequired + type + " " + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name) + " = "
+		String convertedType = NamespaceConverter.convertFromSchema(type);
+
+		if (imports.containsKey(type)) {
+			convertedType = type;
+		} else if (!splitByNamespace) {
+			convertedType = convertedType.substring(convertedType.lastIndexOf(".")+1);
+		}
+
+		return writeIndent() + sRequired + convertedType + " " + fieldName + " = "
 				+ order + ";" + (fieldDocumentation != null ? " // "+fieldDocumentation:"") + "\n";
 	}
 
@@ -231,9 +249,19 @@ public class ProtobufMarshaller   {
 		}
 	}
 
-	public String getImport(String typeName) {
+	public String getImport(String fullTypeName) {
 		if (imports != null) {
-			return imports.get(getTypeMapping(typeName));
+			return imports.get(fullTypeName);
+		}
+		return null;
+	}
+	public String getImport(Field field) {
+		if (imports != null) {
+			String nsPrefix = "";
+			if (field.getTypeNamespace() != null) {
+				nsPrefix = field.getTypeNamespace() + ".";
+			}
+			return imports.get(nsPrefix + field.getType());
 		}
 		return null;
 	}

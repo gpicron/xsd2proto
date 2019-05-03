@@ -23,6 +23,7 @@
  */package com.github.tranchis.xsd2thrift;
 
 import com.sun.xml.xsom.XmlString;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class Field
 {
@@ -37,17 +38,19 @@ public class Field
 	private String name;
     private String typeNamespace;
 	private String type;
+	private String doc;
 	private boolean required;
 	private boolean repeat;
 	private XmlString def;
 
-	public Field(String name, String typeNamespace, String type, boolean repeat, XmlString def, boolean required)
+	public Field(String name, String typeNamespace, String type, boolean repeat, XmlString def, String doc, boolean required)
 	{
 		this.name = name;
 		this.type = type;
 		this.required = required;
 		this.def = def;
 		this.repeat = repeat;
+		this.doc = doc;
 		this.typeNamespace = typeNamespace;
 	}
 
@@ -73,6 +76,14 @@ public class Field
 	public void setType(String type)
 	{
 		this.type = type;
+	}
+
+	public String getDoc() {
+		return doc;
+	}
+
+	public void setDoc(String doc) {
+		this.doc = doc;
 	}
 
 	public boolean isRequired()
@@ -105,4 +116,39 @@ public class Field
 		this.def = def;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+
+		Field field = (Field) o;
+
+		return new org.apache.commons.lang3.builder.EqualsBuilder()
+				.append(required, field.required)
+				.append(repeat, field.repeat)
+				.append(name, field.name)
+				.append(typeNamespace, field.typeNamespace)
+				.append(type, field.type)
+				.append(doc, field.doc)
+				.append(def, field.def)
+				.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+				.append(name)
+				.append(typeNamespace)
+				.append(type)
+				.append(doc)
+				.append(required)
+				.append(repeat)
+				.append(def)
+				.toHashCode();
+	}
 }
