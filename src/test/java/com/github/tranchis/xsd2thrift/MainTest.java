@@ -16,7 +16,7 @@ public class MainTest {
 				generateProtobuf("atom"));
 	}
 
-	//@Ignore
+	@Test
 	public void compareRecipeProtobuf() throws IOException {
 		compareExpectedAndGenerated("src/test/resources/expectedproto/recipe.proto",
 				generateProtobuf("recipe"));
@@ -76,14 +76,14 @@ public class MainTest {
 				generateProtobuf("test-range"));
 	}
 
-//	@Ignore("Order seems to change on the test run")
+	@Test
 	public void compareXmlRecipemlProtobuf()  throws IOException{
 		compareExpectedAndGenerated(
 				"src/test/resources/expectedproto/xml-recipeml.proto",
 				generateProtobuf("xml-recipeml"));
 	}
 
-//	@Ignore("Order seems to change on the test run")
+	@Test
 	public void compareRecipemlProtobuf()  throws IOException{
 		compareExpectedAndGenerated("src/test/resources/expectedproto/recipeml.proto",
 				generateProtobuf("recipeml"));
