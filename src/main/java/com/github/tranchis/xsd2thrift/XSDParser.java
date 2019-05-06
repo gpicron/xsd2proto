@@ -86,6 +86,7 @@ public class XSDParser implements ErrorHandler {
 		keywords.add("transient");
 		keywords.add("service");
 		keywords.add("else");
+		keywords.add("descriptor");
 
 		basicTypes = new TreeSet<String>();
 		basicTypes.add("string");
@@ -420,7 +421,7 @@ public class XSDParser implements ErrorHandler {
 
 		if (!Character.isJavaIdentifierStart(nameChars[0])
 				|| keywords.contains(res)) {
-			res = "_" + res;
+			res = res + "Value";
 		}
 
 		return res;
