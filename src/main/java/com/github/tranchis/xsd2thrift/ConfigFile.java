@@ -9,6 +9,7 @@ public class ConfigFile {
 	public boolean splitBySchema = false;
 	public Map<String, String> customTypeMappings;
 	public Map<String, String> customNameMappings;
+	public Map<String, Object> options;
 	public boolean nestEnums;
 	public boolean typeInEnums = true;
 	public boolean includeMessageDocs = true;

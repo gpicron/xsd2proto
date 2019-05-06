@@ -112,6 +112,7 @@ public class Main {
 
 			Map<Pattern, String> customTypeMappings = null;
 			Map<Pattern, String> customNameMappings = null;
+			Map<String, Object> options = null;
 
 			if (args.length == 2 && args[0].startsWith("--configFile=")) {
 				Yaml yaml = new Yaml();
@@ -140,11 +141,13 @@ public class Main {
 							customNameMappings.put(p, kv.getValue());
 						}
 					}
+					options = config.options;
 					xp.setNestEnums(config.nestEnums);
 					xp.setEnumOrderStart(0);
 					xp.setTypeInEnums(config.typeInEnums);
 					xp.setIncludeMessageDocs(config.includeMessageDocs);
 					xp.setIncludeFieldDocs(config.includeFieldDocs);
+
 				} catch (IOException e) {
 					LOGGER.error("Unable to find config file " + configFile, e);
 				}
@@ -208,6 +211,9 @@ public class Main {
 			}
 			if (customNameMappings != null) {
 				pbm.setCustomNameMappings(customNameMappings);
+			}
+			if (options != null) {
+				pbm.setOptions(options);
 			}
 
 			if (correct) {

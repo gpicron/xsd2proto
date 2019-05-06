@@ -38,8 +38,9 @@ public class ProtobufMarshaller   {
 	private HashMap<Pattern, String> nameMapping;
 	private String indent = "";
 	public HashMap<String, String> imports;
+    private Map<String, Object> options;
 
-	public ProtobufMarshaller() {
+    public ProtobufMarshaller() {
 		typeMapping = new HashMap<>();
 		typeMapping.put(Pattern.compile("^positiveInteger$"), "int64");
 		typeMapping.put(Pattern.compile("^nonPositiveInteger$"), "sint64");
@@ -100,6 +101,24 @@ public class ProtobufMarshaller   {
 			b.append(escapeNamespace(namespace));
 			b.append(";\n\n");
 		}
+
+		if (options != null) {
+            for (String s : options.keySet()) {
+
+                b.append("option ")
+                        .append(s).append(" = ");
+
+                Object value = options.get(s);
+
+                if (value instanceof String) {
+                    b.append("\"").append(value).append("\"");
+                } else {
+                    b.append(value);
+                }
+
+                b.append(";\n");
+            }
+        }
 
 		return b.toString();
 	}
@@ -265,4 +284,8 @@ public class ProtobufMarshaller   {
 		}
 		return null;
 	}
+
+    public void setOptions(Map<String, Object> options) {
+        this.options = options;
+    }
 }
