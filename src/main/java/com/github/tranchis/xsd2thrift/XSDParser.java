@@ -608,12 +608,19 @@ public class XSDParser implements ErrorHandler {
 					if (particle.getTerm() != null && particle.getTerm().asModelGroup() != null) {
 						List<Field> fields = processModelGroup(particle.getTerm().asModelGroup(), sset);
 						st.addFields(fields, xsdMapping);
+					} else if (particle.getTerm() != null && particle.getTerm().asModelGroupDecl() != null) {
+						List<Field> fields = processModelGroup(particle.getTerm().asModelGroupDecl().getModelGroup(), sset);
+						st.addFields(fields, xsdMapping);
 					}
 				} else if (cType.getContentType().asSimpleType() != null) {
 					XSSimpleType xsSimpleType = cType.getContentType().asSimpleType();
-					XSSimpleType primitiveType = xsSimpleType.getPrimitiveType();
-					if (primitiveType != null) {
-						st.addField(primitiveType.getName(), primitiveType.getTargetNamespace(), true, false, null, resolveDocumentationAnnotation(cType), xsdMapping);
+					if (basicTypes.contains(xsSimpleType.getName())) {
+						st.addField(xsSimpleType.getName(), xsSimpleType.getName(), true, false, null, resolveDocumentationAnnotation(cType), xsdMapping);
+					} else {
+						XSSimpleType primitiveType = xsSimpleType.getPrimitiveType();
+						if (primitiveType != null) {
+							st.addField(primitiveType.getName(), primitiveType.getTargetNamespace(), primitiveType.getName(), true, false, null, resolveDocumentationAnnotation(cType), xsdMapping);
+						}
 					}
 				}
 
