@@ -93,7 +93,7 @@ public class MainTest {
 	public void fieldAndMessageRenaming() throws IOException {
 		compareExpectedAndGenerated(
 				"src/test/resources/expectedproto/complexTypeRenaming.proto",
-				generateProtobuf("complexTypeRenaming",null,
+				generateProtobuf("complexTypeRenaming","^ElementListOriginalName$:ElementListNewName,^ElementInListOfComplexTypeOriginalName$:ElementInListOfComplexTypeNewName,^ComplexTypeOriginalName$:ComplexTypeNewName,^ElementInListOriginalName$:ElementInListNewName",
 						"^ElementListOriginalName$:ElementListNewName,^ElementInListOfComplexTypeOriginalName$:ElementInListOfComplexTypeNewName,^ComplexTypeOriginalName$:ComplexTypeNewName,^ElementInListOriginalName$:ElementInListNewName", "org.myrecipies"));
 	}
 

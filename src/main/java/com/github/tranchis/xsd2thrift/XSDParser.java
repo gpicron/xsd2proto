@@ -302,9 +302,9 @@ public class XSDParser implements ErrorHandler {
 				writer.addInclusion(st.getNamespace(), f.getTypeNamespace());
 			}
 
-			if (marshaller.getNameMapping(type) != null) {
+			if (marshaller.getTypeMapping(type) != null) {
 				//Message-type has been overridden, need to override all usage
-				type = marshaller.getNameMapping(type);
+				type = marshaller.getTypeMapping(type);
 			}
 
 			type = typeNameSpace + escapeType(type);
