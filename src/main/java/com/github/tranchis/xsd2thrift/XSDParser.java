@@ -603,7 +603,9 @@ public class XSDParser implements ErrorHandler {
 			st.setDoc(doc);
 
 			map.put(typeName, st);
-			if (cType.getContentType() != null) {
+			if (cType.asComplexType() != null) {
+                processComplexType(cType, elementName, sset);
+            } else if (cType.getContentType() != null) {
 				if (cType.getContentType().asParticle() != null) {
 					XSParticle particle = cType.getContentType().asParticle();
 					if (particle.getTerm() != null && particle.getTerm().asModelGroup() != null) {
