@@ -36,6 +36,7 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.error.YAMLException;
 
 import com.github.tranchis.xsd2thrift.marshal.ProtobufMarshaller;
 
@@ -150,6 +151,9 @@ public class Main {
 
 				} catch (IOException e) {
 					LOGGER.error("Unable to find config file " + configFile, e);
+				} catch (YAMLException e) {
+					LOGGER.error("Error parsing config file", e);
+									
 				}
 			} else {
 				i = 0;
