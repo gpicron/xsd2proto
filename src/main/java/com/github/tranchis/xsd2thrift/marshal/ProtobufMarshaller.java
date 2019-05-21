@@ -209,11 +209,11 @@ public class ProtobufMarshaller {
 	}
 
 	private void increaseIndent() {
-		indent += "\t";
+		indent += "  ";
 	}
 
 	private void decreaseIndent() {
-		indent = indent.substring(0, indent.length() > 0 ? indent.length() - 1 : 0);
+		indent = indent.substring(0, indent.length() > 0 ? indent.length() - 2 : 0);
 	}
 
 	private String writeIndent() {
