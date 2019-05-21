@@ -364,8 +364,8 @@ public class XSDParser implements ErrorHandler {
 			typePrefix = "";
 		}
 
-		// Adding a default-value as "NOT_SET"
-		os(en.getNamespace()).write(marshaller.writeEnumValue(enumOrder, escape(typePrefix + "notSet")).getBytes());
+		// Adding a default-value as "UNSPECIFIED"
+		os(en.getNamespace()).write(marshaller.writeEnumValue(enumOrder, escape(typePrefix + "unspecified")).getBytes());
 		enumOrder++;
 
 		if (itg.hasNext()) {

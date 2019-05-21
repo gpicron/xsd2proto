@@ -121,10 +121,10 @@ message textType
 	string lang = 2;
 	enum typeType
 	{
-		TYPE_TYPE_NOT_SET = 1;
-		TYPE_TYPE_HTML = 2;
-		TYPE_TYPE_TEXT = 3;
-		TYPE_TYPE_XHTML = 4;
+		TYPE_TYPE_UNSPECIFIED = 0;
+		TYPE_TYPE_HTML = 1;
+		TYPE_TYPE_TEXT = 2;
+		TYPE_TYPE_XHTML = 3;
 	}
 	typeType type = 3;
 }
