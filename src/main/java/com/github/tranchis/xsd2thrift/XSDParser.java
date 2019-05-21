@@ -158,42 +158,42 @@ public class XSDParser implements ErrorHandler {
 	}
 
 	private void writeMap() throws Exception {
-		Iterator<Message> its;
-		Message st;
-		Set<Message> ss;
+		Iterator<Message> messageIterator;
+		Message message;
+		Set<Message> messageSet;
 		Set<String> declared;
-		Iterator<String> ite;
+		
 		boolean bModified;
 
 		if (!marshaller.isNestedEnums() || !isNestEnums()) {
-			ite = enums.keySet().iterator();
+			Iterator<String> ite = enums.keySet().iterator();
 			while (ite.hasNext()) {
 				writeEnum(ite.next());
 			}
 		}
 
-		ss = new TreeSet<Message>(map.values());
+		messageSet = new TreeSet<Message>(map.values());
 		declared = new TreeSet<String>(basicTypes);
 		declared.addAll(enums.keySet());
 		declared.addAll(simpleTypes.keySet());
 
 		bModified = true;
-		while (bModified && !ss.isEmpty()) {
+		while (bModified && !messageSet.isEmpty()) {
 			bModified = false;
-			its = map.values().iterator();
-			while (its.hasNext()) {
-				st = its.next();
-				writeStruct(st, declared);
-				ss.remove(st);
+			messageIterator = map.values().iterator();
+			while (messageIterator.hasNext()) {
+				message = messageIterator.next();
+				writeMessage(message, declared);
+				messageSet.remove(message);
 				bModified = true;
 			}
 		}
 
-		if (!ss.isEmpty()) {
+		if (!messageSet.isEmpty()) {
 			// Check if we are missing a type or it's a circular dependency
 			Set<String> requiredTypes = new TreeSet<String>();
 			Set<String> notYetDeclaredTypes = new TreeSet<String>();
-			for (Message s : ss) {
+			for (Message s : messageSet) {
 				requiredTypes.addAll(s.getTypes());
 				notYetDeclaredTypes.add(s.getName());
 			}
@@ -203,14 +203,14 @@ public class XSDParser implements ErrorHandler {
 				// Circular dependencies have been detected
 				if (marshaller.isCircularDependencySupported()) {
 					// Just dump the rest
-					for (Message s : ss) {
-						writeStruct(s, declared);
+					for (Message s : messageSet) {
+						writeMessage(s, declared);
 					}
 				} else {
 					// Report circular dependency
 					LOGGER.error(
 							"Source schema contains circular dependencies and the target marshaller does not support them. Refer to the reduced dependency graph below.");
-					for (Message s : ss) {
+					for (Message s : messageSet) {
 						s.getTypes().removeAll(declared);
 						LOGGER.error(s.getName() + ": " + s.getTypes());
 					}
@@ -219,7 +219,7 @@ public class XSDParser implements ErrorHandler {
 			} else {
 				// Missing types have been detected
 				LOGGER.error("Source schema contains references missing types");
-				for (Message s : ss) {
+				for (Message s : messageSet) {
 					s.getTypes().retainAll(requiredTypes);
 					if (!s.getTypes().isEmpty()) {
 						LOGGER.error(s.getName() + ": " + s.getTypes());
@@ -230,91 +230,91 @@ public class XSDParser implements ErrorHandler {
 		}
 	}
 
-	private void writeStruct(Message st, Set<String> declared) throws IOException {
+	private void writeMessage(Message message, Set<String> declared) throws IOException {
 		Iterator<Field> itf;
-		Field f;
-		String fname, type;
+		Field field;
+		String fieldName, fieldType;
 		Set<String> usedInEnums;
 		int order;
 
-		writeMessageDocumentation(st.getDoc(), st.getNamespace());
+		writeMessageDocumentation(message.getDoc(), message.getNamespace());
 
-		String messageName = st.getName();
+		String messageName = message.getName();
 
 		if (marshaller.getNameMapping(messageName) != null) {
 			messageName = marshaller.getNameMapping(messageName);
 		}
 
-		os(st.getNamespace()).write(marshaller.writeStructHeader(escape(messageName)).getBytes());
+		os(message.getNamespace()).write(marshaller.writeStructHeader(escape(messageName)).getBytes());
 
-		itf = orderedIteratorForFields(st.getFields());
+		itf = orderedIteratorForFields(message.getFields());
 		usedInEnums = new TreeSet<String>();
 		order = 1;
 		while (itf.hasNext()) {
-			f = itf.next();
-			fname = f.getName();
-			if (marshaller.getNameMapping(fname) != null) {
-				fname = marshaller.getNameMapping(fname);
+			field = itf.next();
+			fieldName = field.getName();
+			if (marshaller.getNameMapping(fieldName) != null) {
+				fieldName = marshaller.getNameMapping(fieldName);
 			}
 
-			type = f.getType();
-			if (type == null) {
-				type = f.getName();
+			fieldType = field.getType();
+			if (fieldType == null) {
+				fieldType = field.getName();
 			}
-			if (isNestEnums() && marshaller.isNestedEnums() && enums.containsKey(type) && !usedInEnums.contains(type)) {
-				usedInEnums.add(type);
-				writeEnum(type);
-			}
-
-			if (simpleTypes.containsKey(type)) {
-				type = simpleTypes.get(type);
+			if (isNestEnums() && marshaller.isNestedEnums() && enums.containsKey(fieldType) && !usedInEnums.contains(fieldType)) {
+				usedInEnums.add(fieldType);
+				writeEnum(fieldType);
 			}
 
-			if (!map.keySet().contains(type) && !basicTypes.contains(type) && !enums.containsKey(type)) {
-				type = "binary";
+			if (simpleTypes.containsKey(fieldType)) {
+				fieldType = simpleTypes.get(fieldType);
 			}
-			if (type.equals(fname)) {
-				fname = "_" + fname;
+
+			if (!map.keySet().contains(fieldType) && !basicTypes.contains(fieldType) && !enums.containsKey(fieldType)) {
+				fieldType = "binary";
+			}
+			if (fieldType.equals(fieldName)) {
+				fieldName = "_" + fieldName;
 			}
 
 			String typeNameSpace = "";
-			if (marshaller.getTypeMapping(type) != null) {
-				type = marshaller.getTypeMapping(type);
-				int qualifyingDot = type.lastIndexOf('.');
+			if (marshaller.getTypeMapping(fieldType) != null) {
+				fieldType = marshaller.getTypeMapping(fieldType);
+				int qualifyingDot = fieldType.lastIndexOf('.');
 				if (qualifyingDot > -1) {
-					typeNameSpace = type.substring(0, qualifyingDot + 1);
+					typeNameSpace = fieldType.substring(0, qualifyingDot + 1);
 					String inclusionPath;
-					if (marshaller.getImport(type) != null) {
-						inclusionPath = marshaller.getImport(type);
+					if (marshaller.getImport(fieldType) != null) {
+						inclusionPath = marshaller.getImport(fieldType);
 					} else {
-						inclusionPath = type.substring(0, qualifyingDot);
+						inclusionPath = fieldType.substring(0, qualifyingDot);
 					}
-					writer.addInclusion(st.getNamespace(), inclusionPath);
-					type = type.substring(qualifyingDot + 1);
+					writer.addInclusion(message.getNamespace(), inclusionPath);
+					fieldType = fieldType.substring(qualifyingDot + 1);
 				}
-			} else if (!basicTypes.contains(type) && f.getTypeNamespace() != null && !f.getTypeNamespace().equals(st.getNamespace())) {
-				typeNameSpace = f.getTypeNamespace() + ".";
-				writer.addInclusion(st.getNamespace(), f.getTypeNamespace());
+			} else if (!basicTypes.contains(fieldType) && field.getTypeNamespace() != null && !field.getTypeNamespace().equals(message.getNamespace())) {
+				typeNameSpace = field.getTypeNamespace() + ".";
+				writer.addInclusion(message.getNamespace(), field.getTypeNamespace());
 			}
 
-			if (marshaller.getTypeMapping(type) != null) {
+			if (marshaller.getTypeMapping(fieldType) != null) {
 				// Message-type has been overridden, need to override all usage
-				type = marshaller.getTypeMapping(type);
+				fieldType = marshaller.getTypeMapping(fieldType);
 			}
 
-			type = typeNameSpace + escapeType(type);
+			fieldType = typeNameSpace + escapeType(fieldType);
 
 			String doc = null;
-			if (map.get(type) != null) {
-				doc = map.get(type).getDoc();
+			if (map.get(fieldType) != null) {
+				doc = map.get(fieldType).getDoc();
 			}
 
-			os(st.getNamespace())
-					.write(marshaller.writeStructParameter(order, f.isRequired(), f.isRepeat(), escape(fname), type, doc, writer.isSplitBySchema()).getBytes());
+			os(message.getNamespace())
+					.write(marshaller.writeStructParameter(order, field.isRequired(), field.isRepeat(), escape(fieldName), fieldType, doc, writer.isSplitBySchema()).getBytes());
 			order = order + 1;
 		}
-		os(st.getNamespace()).write(marshaller.writeStructFooter().getBytes());
-		declared.add(st.getName());
+		os(message.getNamespace()).write(marshaller.writeStructFooter().getBytes());
+		declared.add(message.getName());
 	}
 
 	private void writeMessageDocumentation(String doc, String namespace) throws IOException {
