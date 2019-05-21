@@ -22,29 +22,27 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307, USA.
  */package com.github.tranchis.xsd2thrift;
 
-import com.sun.xml.xsom.XmlString;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-public class Field
-{
+import com.sun.xml.xsom.XmlString;
 
-    @Override
+public class Field {
+
+	@Override
 	public String toString() {
-		return "Field [name=" + name + ", typeNamespace=" + typeNamespace
-				+ ", type=" + type + ", required=" + required + ", repeat="
-				+ repeat + ", def=" + def + "]";
+		return "Field [name=" + name + ", typeNamespace=" + typeNamespace + ", type=" + type + ", required=" + required + ", repeat=" + repeat + ", def=" + def
+				+ "]";
 	}
 
 	private String name;
-    private String typeNamespace;
+	private String typeNamespace;
 	private String type;
 	private String doc;
 	private boolean required;
 	private boolean repeat;
 	private XmlString def;
 
-	public Field(String name, String typeNamespace, String type, boolean repeat, XmlString def, String doc, boolean required)
-	{
+	public Field(String name, String typeNamespace, String type, boolean repeat, XmlString def, String doc, boolean required) {
 		this.name = name;
 		this.type = type;
 		this.required = required;
@@ -55,26 +53,22 @@ public class Field
 	}
 
 	public String getTypeNamespace() {
-        return typeNamespace;
-    }
+		return typeNamespace;
+	}
 
-    public String getName()
-	{
+	public String getName() {
 		return name;
 	}
 
-	public void setName(String name)
-	{
+	public void setName(String name) {
 		this.name = name;
 	}
 
-	public String getType()
-	{
+	public String getType() {
 		return type;
 	}
 
-	public void setType(String type)
-	{
+	public void setType(String type) {
 		this.type = type;
 	}
 
@@ -86,33 +80,27 @@ public class Field
 		this.doc = doc;
 	}
 
-	public boolean isRequired()
-	{
+	public boolean isRequired() {
 		return required;
 	}
 
-	public void setRequired(boolean required)
-	{
+	public void setRequired(boolean required) {
 		this.required = required;
 	}
 
-	public boolean isRepeat()
-	{
+	public boolean isRepeat() {
 		return repeat;
 	}
 
-	public void setRepeat(boolean repeat)
-	{
+	public void setRepeat(boolean repeat) {
 		this.repeat = repeat;
 	}
 
-	public XmlString getDef()
-	{
+	public XmlString getDef() {
 		return def;
 	}
 
-	public void setDef(XmlString def)
-	{
+	public void setDef(XmlString def) {
 		this.def = def;
 	}
 
@@ -128,8 +116,7 @@ public class Field
 
 		Field field = (Field) o;
 
-		return new org.apache.commons.lang3.builder.EqualsBuilder()
-				.append(required, field.required)
+		return new org.apache.commons.lang3.builder.EqualsBuilder().append(required, field.required)
 				.append(repeat, field.repeat)
 				.append(name, field.name)
 				.append(typeNamespace, field.typeNamespace)
@@ -141,14 +128,6 @@ public class Field
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-				.append(name)
-				.append(typeNamespace)
-				.append(type)
-				.append(doc)
-				.append(required)
-				.append(repeat)
-				.append(def)
-				.toHashCode();
+		return new HashCodeBuilder(17, 37).append(name).append(typeNamespace).append(type).append(doc).append(required).append(repeat).append(def).toHashCode();
 	}
 }

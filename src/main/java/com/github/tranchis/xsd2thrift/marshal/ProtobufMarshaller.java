@@ -33,14 +33,14 @@ import com.github.tranchis.xsd2thrift.Field;
 import com.github.tranchis.xsd2thrift.NamespaceConverter;
 import com.google.common.base.CaseFormat;
 
-public class ProtobufMarshaller   {
+public class ProtobufMarshaller {
 	private HashMap<Pattern, String> typeMapping;
 	private HashMap<Pattern, String> nameMapping;
 	private String indent = "";
 	public HashMap<String, String> imports;
-    private Map<String, Object> options;
+	private Map<String, Object> options;
 
-    public ProtobufMarshaller() {
+	public ProtobufMarshaller() {
 		typeMapping = new HashMap<>();
 		typeMapping.put(Pattern.compile("^positiveInteger$"), "int64");
 		typeMapping.put(Pattern.compile("^nonPositiveInteger$"), "sint64");
@@ -68,18 +68,17 @@ public class ProtobufMarshaller   {
 		typeMapping.put(Pattern.compile("^normalizedString$"), "string");
 		typeMapping.put(Pattern.compile("^boolean$"), "bool");
 		typeMapping.put(Pattern.compile("^binary$"), "bytes"); // UnspecifiedType.object is
-											// declared binary
+		// declared binary
 		typeMapping.put(Pattern.compile("^hexBinary$"), "bytes");
 		typeMapping.put(Pattern.compile("^base64Binary$"), "bytes");
 		typeMapping.put(Pattern.compile("^byte$"), "bytes");
 		typeMapping.put(Pattern.compile("^date$"), "int32"); // Number of days since January 1st),
-											// 1970
+		// 1970
 		typeMapping.put(Pattern.compile("^dateTime$"), "int64"); // Number of milliseconds since
-												// January 1st), 1970
+		// January 1st), 1970
 
 		typeMapping.put(Pattern.compile("^time$"), "google.protobuf.Timestamp");
 		typeMapping.put(Pattern.compile("^duration$"), "google.protobuf.Duration");
-
 
 		nameMapping = new HashMap<>();
 
@@ -88,11 +87,10 @@ public class ProtobufMarshaller   {
 		imports.put("google.protobuf.Duration", "google/protobuf/duration");
 	}
 
-	
 	public String writeHeader(String namespace) {
-		
+
 		StringBuilder b = new StringBuilder();
-		
+
 		// Syntax
 		b.append("syntax = \"proto3\";\n\n");
 
@@ -103,22 +101,21 @@ public class ProtobufMarshaller   {
 		}
 
 		if (options != null) {
-            for (String s : options.keySet()) {
+			for (String s : options.keySet()) {
 
-                b.append("option ")
-                        .append(s).append(" = ");
+				b.append("option ").append(s).append(" = ");
 
-                Object value = options.get(s);
+				Object value = options.get(s);
 
-                if (value instanceof String) {
-                    b.append("\"").append(value).append("\"");
-                } else {
-                    b.append(value);
-                }
+				if (value instanceof String) {
+					b.append("\"").append(value).append("\"");
+				} else {
+					b.append(value);
+				}
 
-                b.append(";\n");
-            }
-        }
+				b.append(";\n");
+			}
+		}
 
 		return b.toString();
 	}
@@ -129,43 +126,36 @@ public class ProtobufMarshaller   {
 		}
 		return namespace.replaceAll("\\.([0-9])", "_$1");
 	}
-	
+
 	public String writeEnumHeader(String name) {
-		final String result = writeIndent() + "enum " + name + "\n"
-				+ writeIndent() + "{\n";
+		final String result = writeIndent() + "enum " + name + "\n" + writeIndent() + "{\n";
 		increaseIndent();
 		return result;
 	}
 
-	
 	public String writeEnumValue(int order, String value) {
 		return (writeIndent() + CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, value) + " = " + order + ";\n");
 	}
 
-	
 	public String writeEnumFooter() {
 		decreaseIndent();
 		return writeIndent() + "}\n";
 	}
 
-	
 	public String writeStructHeader(String name) {
 		final String result = writeIndent() + "message " + name + "\n{\n";
 		increaseIndent();
 		return result;
 	}
 
-
-	public String writeStructParameter(int order, boolean required,
-			boolean repeated, String name, String type, String fieldDocumentation, boolean splitByNamespace) {
+	public String writeStructParameter(int order, boolean required, boolean repeated, String name, String type, String fieldDocumentation,
+			boolean splitByNamespace) {
 		String sRequired = "";
 
 		if (fieldDocumentation != null) {
-			fieldDocumentation = fieldDocumentation
-										.replaceAll("\n", " ")
-										.replaceAll("\t", " ");
+			fieldDocumentation = fieldDocumentation.replaceAll("\n", " ").replaceAll("\t", " ");
 		}
-	
+
 		if (repeated) {
 			sRequired = "repeated ";
 		}
@@ -176,51 +166,44 @@ public class ProtobufMarshaller   {
 		if (imports.containsKey(type)) {
 			convertedType = type;
 		} else if (!splitByNamespace) {
-			convertedType = convertedType.substring(convertedType.lastIndexOf(".")+1);
+			convertedType = convertedType.substring(convertedType.lastIndexOf(".") + 1);
 		}
 
-		return writeIndent() + sRequired + convertedType + " " + fieldName + " = "
-				+ order + ";" + (fieldDocumentation != null ? " // "+fieldDocumentation:"") + "\n";
+		return writeIndent() + sRequired + convertedType + " " + fieldName + " = " + order + ";"
+				+ (fieldDocumentation != null ? " // " + fieldDocumentation : "") + "\n";
 	}
 
-	
-
-	
 	public String writeStructFooter() {
 		decreaseIndent();
 		return writeIndent() + "}\n\n";
 	}
 
-	
 	public String getTypeMapping(String type) {
-		for(Pattern p : typeMapping.keySet()) {
+		for (Pattern p : typeMapping.keySet()) {
 			Matcher m = p.matcher(type);
 			if (m.find()) {
-			    return m.replaceAll(typeMapping.get(p));
-			}	
+				return m.replaceAll(typeMapping.get(p));
+			}
 		}
-		
+
 		return null;
 	}
-
 
 	public String getNameMapping(String type) {
-		for(Pattern p : nameMapping.keySet()) {
+		for (Pattern p : nameMapping.keySet()) {
 			Matcher m = p.matcher(type);
 			if (m.find()) {
-			    return m.replaceAll(nameMapping.get(p));
-			}	
+				return m.replaceAll(nameMapping.get(p));
+			}
 		}
-		
+
 		return null;
 	}
 
-	
 	public boolean isNestedEnums() {
 		return true;
 	}
 
-	
 	public boolean isCircularDependencySupported() {
 		return true;
 	}
@@ -230,15 +213,13 @@ public class ProtobufMarshaller   {
 	}
 
 	private void decreaseIndent() {
-		indent = indent.substring(0, indent.length() > 0 ? indent.length() - 1
-				: 0);
+		indent = indent.substring(0, indent.length() > 0 ? indent.length() - 1 : 0);
 	}
 
 	private String writeIndent() {
 		return indent;
 	}
 
-	
 	public String writeInclude(String namespace) {
 		String res;
 
@@ -251,7 +232,6 @@ public class ProtobufMarshaller   {
 		return res;
 	}
 
-	
 	public void setCustomTypeMappings(Map<Pattern, String> customTypeMappings) {
 		if (customTypeMappings != null) {
 			for (Entry<Pattern, String> entry : customTypeMappings.entrySet()) {
@@ -274,6 +254,7 @@ public class ProtobufMarshaller   {
 		}
 		return null;
 	}
+
 	public String getImport(Field field) {
 		if (imports != null) {
 			String nsPrefix = "";
@@ -285,7 +266,7 @@ public class ProtobufMarshaller   {
 		return null;
 	}
 
-    public void setOptions(Map<String, Object> options) {
-        this.options = options;
-    }
+	public void setOptions(Map<String, Object> options) {
+		this.options = options;
+	}
 }

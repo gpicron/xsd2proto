@@ -12,9 +12,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.collect.ImmutableList;
 import com.squareup.wire.schema.Options;
 import com.squareup.wire.schema.ProtoFile;
@@ -46,9 +43,9 @@ public class ProtoComparator {
 	}
 
 	private static void compareServices(ImmutableList<Service> expected, ImmutableList<Service> generated) {
-		
+
 		Map<String, Service> expectedMap = new HashMap<>();
-		Map<String,Service> generatedMap = new HashMap<>();
+		Map<String, Service> generatedMap = new HashMap<>();
 
 		for (Service t : expected) {
 			expectedMap.put(t.name(), t);
@@ -74,17 +71,16 @@ public class ProtoComparator {
 
 	private static void compareService(Service expected, Service generated) {
 
-		assertEquals(expected.documentation(),generated.documentation(),"Service documentation mismatch");
-		assertEquals(expected.name(),generated.name(),"Service name mismatch");
-		
-		compareRpcs(expected.rpcs(),generated.rpcs());
-		
-		
+		assertEquals(expected.documentation(), generated.documentation(), "Service documentation mismatch");
+		assertEquals(expected.name(), generated.name(), "Service name mismatch");
+
+		compareRpcs(expected.rpcs(), generated.rpcs());
+
 	}
 
 	private static void compareRpcs(ImmutableList<Rpc> expected, ImmutableList<Rpc> generated) {
 		Map<String, Rpc> expectedMap = new HashMap<>();
-		Map<String,Rpc> generatedMap = new HashMap<>();
+		Map<String, Rpc> generatedMap = new HashMap<>();
 
 		for (Rpc t : expected) {
 			expectedMap.put(t.name(), t);
@@ -109,18 +105,18 @@ public class ProtoComparator {
 	}
 
 	private static void compareRpc(Rpc expected, Rpc generated) {
-		assertEquals(expected.documentation(),generated.documentation(),"Rpc call documentation mismatch");
-		assertEquals(expected.name(),generated.name(),"Rpc call name mismatch");
-		assertEquals(expected.requestStreaming(),generated.requestStreaming(),"Rpc call request streaming mismatch");
-		assertEquals(expected.requestType(),generated.requestType(),"Rpc call request type mismatch");
-		assertEquals(expected.responseStreaming(),generated.responseStreaming(),"Rpc call response streaming mismatch");
-		assertEquals(expected.responseType(),generated.responseType(),"Rpc call response type mismatch");
-		
+		assertEquals(expected.documentation(), generated.documentation(), "Rpc call documentation mismatch");
+		assertEquals(expected.name(), generated.name(), "Rpc call name mismatch");
+		assertEquals(expected.requestStreaming(), generated.requestStreaming(), "Rpc call request streaming mismatch");
+		assertEquals(expected.requestType(), generated.requestType(), "Rpc call request type mismatch");
+		assertEquals(expected.responseStreaming(), generated.responseStreaming(), "Rpc call response streaming mismatch");
+		assertEquals(expected.responseType(), generated.responseType(), "Rpc call response type mismatch");
+
 		compareOptions(expected.options(), generated.options());
 	}
 
 	private static void compareOptions(Options expected, Options generated) {
-			
+
 		Set<ProtoMember> missing = new HashSet<>(expected.map().keySet());
 		missing.removeAll(generated.map().keySet());
 		assertTrue(missing.isEmpty(), "Options not found in generated proto file: " + missing);
@@ -131,7 +127,7 @@ public class ProtoComparator {
 
 		for (Entry<ProtoMember, Object> expectedService : expected.map().entrySet()) {
 			Object generatedType = generated.map().get(expectedService.getKey());
-			assertEquals(expectedService.getValue(),generatedType,"Options value mismatch for "+expectedService.getKey());
+			assertEquals(expectedService.getValue(), generatedType, "Options value mismatch for " + expectedService.getKey());
 		}
 	}
 
@@ -168,8 +164,8 @@ public class ProtoComparator {
 
 	private static void compareType(Type expectedType, Type generatedType) {
 
-		assertEquals(expectedType.documentation(), generatedType.documentation(),"Type documentation mismatch");
-		assertEquals(expectedType.type().toString(), generatedType.type().toString(),"Type information mismatch");
+		assertEquals(expectedType.documentation(), generatedType.documentation(), "Type documentation mismatch");
+		assertEquals(expectedType.type().toString(), generatedType.type().toString(), "Type information mismatch");
 		compareTypes(expectedType.nestedTypes(), generatedType.nestedTypes());
 
 	}

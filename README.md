@@ -33,6 +33,10 @@ OR
   --includeFieldDocs=true|false   : include documentation for fields in output, defaults to true
 ```
 
+## Contribution
+
+See code style [CODESTYLE.md](CODESTYLE.md)
+
 ## License
 
 The code contributed for this package is licensed under LGPL v3 (see LICENSE).

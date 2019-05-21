@@ -45,10 +45,10 @@ public class TestHelper {
 
 			// simple output the computed patch to console
 			if (patch.getDeltas().size() > 0) {
-				
+
 				dumpFile(expected, exlines);
 				dumpFile(generated, genlines);
-				
+
 				FILECONTENTLOGGER.info("Diff between {} and {}", expected, generated);
 				for (AbstractDelta<String> delta : patch.getDeltas()) {
 					FILECONTENTLOGGER.info(delta.getSource() + " <----> " + delta.getTarget());
@@ -62,12 +62,12 @@ public class TestHelper {
 	}
 
 	private static void dumpFile(String filename, List<String> exlines) {
-		FILECONTENTLOGGER.info("****** START "+filename+" ******");
-		int i=0;
-		for(String s : exlines) {
-			FILECONTENTLOGGER.info("["+StringUtils.leftPad(""+i++,4," ")+"] "+s);
+		FILECONTENTLOGGER.info("****** START " + filename + " ******");
+		int i = 0;
+		for (String s : exlines) {
+			FILECONTENTLOGGER.info("[" + StringUtils.leftPad("" + i++, 4, " ") + "] " + s);
 		}
-		FILECONTENTLOGGER.info("****** END   "+filename+" ******");
+		FILECONTENTLOGGER.info("****** END   " + filename + " ******");
 	}
 
 	public static String generateProtobuf(String name, String typeMappings, String nameMappings, String packageName) {
@@ -86,7 +86,7 @@ public class TestHelper {
 
 		List<String> args = new ArrayList<>();
 		args.add("--filename=" + filename);
-		args.add("--package="+packageName);
+		args.add("--package=" + packageName);
 		if (typeMappings != null) {
 			args.add("--customTypeMappings=" + typeMappings);
 		}

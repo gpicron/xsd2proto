@@ -30,8 +30,6 @@ import java.util.*;
 
 import javax.xml.parsers.SAXParserFactory;
 
-import com.sun.xml.xsom.*;
-import com.sun.xml.xsom.impl.ComplexTypeImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
@@ -40,11 +38,13 @@ import org.w3c.dom.Text;
 import org.xml.sax.*;
 
 import com.github.tranchis.xsd2thrift.marshal.ProtobufMarshaller;
+import com.sun.xml.xsom.*;
+import com.sun.xml.xsom.impl.ComplexTypeImpl;
 import com.sun.xml.xsom.parser.XSOMParser;
 import com.sun.xml.xsom.util.DomAnnotationParserFactory;
 
 public class XSDParser implements ErrorHandler {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(XSDParser.class);
 
 	private File f;
@@ -127,7 +127,7 @@ public class XSDParser implements ErrorHandler {
 		basicTypes.add("NMTOKEN");
 		basicTypes.add("NMTOKENS");
 		basicTypes.add("Name");
-		
+
 		// basicTypes.add("BaseObject");
 	}
 
@@ -208,7 +208,8 @@ public class XSDParser implements ErrorHandler {
 					}
 				} else {
 					// Report circular dependency
-					LOGGER.error("Source schema contains circular dependencies and the target marshaller does not support them. Refer to the reduced dependency graph below.");
+					LOGGER.error(
+							"Source schema contains circular dependencies and the target marshaller does not support them. Refer to the reduced dependency graph below.");
 					for (Message s : ss) {
 						s.getTypes().removeAll(declared);
 						LOGGER.error(s.getName() + ": " + s.getTypes());
@@ -229,8 +230,7 @@ public class XSDParser implements ErrorHandler {
 		}
 	}
 
-	private void writeStruct(Message st, Set<String> declared)
-			throws IOException {
+	private void writeStruct(Message st, Set<String> declared) throws IOException {
 		Iterator<Field> itf;
 		Field f;
 		String fname, type;
@@ -241,7 +241,7 @@ public class XSDParser implements ErrorHandler {
 
 		String messageName = st.getName();
 
-		if(marshaller.getNameMapping(messageName) != null) {
+		if (marshaller.getNameMapping(messageName) != null) {
 			messageName = marshaller.getNameMapping(messageName);
 		}
 
@@ -253,16 +253,15 @@ public class XSDParser implements ErrorHandler {
 		while (itf.hasNext()) {
 			f = itf.next();
 			fname = f.getName();
-			if(marshaller.getNameMapping(fname) != null) {
+			if (marshaller.getNameMapping(fname) != null) {
 				fname = marshaller.getNameMapping(fname);
 			}
-			
+
 			type = f.getType();
 			if (type == null) {
 				type = f.getName();
 			}
-			if (isNestEnums() && marshaller.isNestedEnums()
-					&& enums.containsKey(type) && !usedInEnums.contains(type)) {
+			if (isNestEnums() && marshaller.isNestedEnums() && enums.containsKey(type) && !usedInEnums.contains(type)) {
 				usedInEnums.add(type);
 				writeEnum(type);
 			}
@@ -271,8 +270,7 @@ public class XSDParser implements ErrorHandler {
 				type = simpleTypes.get(type);
 			}
 
-			if (!map.keySet().contains(type) && !basicTypes.contains(type)
-					&& !enums.containsKey(type)) {
+			if (!map.keySet().contains(type) && !basicTypes.contains(type) && !enums.containsKey(type)) {
 				type = "binary";
 			}
 			if (type.equals(fname)) {
@@ -291,32 +289,28 @@ public class XSDParser implements ErrorHandler {
 					} else {
 						inclusionPath = type.substring(0, qualifyingDot);
 					}
-					writer.addInclusion(st.getNamespace(),
-							inclusionPath);
+					writer.addInclusion(st.getNamespace(), inclusionPath);
 					type = type.substring(qualifyingDot + 1);
 				}
-			} else if (!basicTypes.contains(type)
-					&& f.getTypeNamespace() != null
-					&& !f.getTypeNamespace().equals(st.getNamespace())) {
+			} else if (!basicTypes.contains(type) && f.getTypeNamespace() != null && !f.getTypeNamespace().equals(st.getNamespace())) {
 				typeNameSpace = f.getTypeNamespace() + ".";
 				writer.addInclusion(st.getNamespace(), f.getTypeNamespace());
 			}
 
 			if (marshaller.getTypeMapping(type) != null) {
-				//Message-type has been overridden, need to override all usage
+				// Message-type has been overridden, need to override all usage
 				type = marshaller.getTypeMapping(type);
 			}
 
 			type = typeNameSpace + escapeType(type);
 
-            String doc = null;
+			String doc = null;
 			if (map.get(type) != null) {
-			    doc = map.get(type).getDoc();
-            }
+				doc = map.get(type).getDoc();
+			}
 
-            os(st.getNamespace()).write(
-					marshaller.writeStructParameter(order, f.isRequired(),
-							f.isRepeat(), escape(fname), type, doc, writer.isSplitBySchema()).getBytes());
+			os(st.getNamespace())
+					.write(marshaller.writeStructParameter(order, f.isRequired(), f.isRepeat(), escape(fname), type, doc, writer.isSplitBySchema()).getBytes());
 			order = order + 1;
 		}
 		os(st.getNamespace()).write(marshaller.writeStructFooter().getBytes());
@@ -360,8 +354,7 @@ public class XSDParser implements ErrorHandler {
 
 		writeMessageDocumentation(en.getDoc(), en.getNamespace());
 
-		os(en.getNamespace()).write(
-				marshaller.writeEnumHeader(enumValue).getBytes());
+		os(en.getNamespace()).write(marshaller.writeEnumHeader(enumValue).getBytes());
 		itg = en.iterator();
 		int enumOrder = this.enumOrderStart;
 		String typePrefix;
@@ -371,26 +364,17 @@ public class XSDParser implements ErrorHandler {
 			typePrefix = "";
 		}
 
-		//Adding a default-value as "NOT_SET"
-		os(en.getNamespace()).write(
-				marshaller.writeEnumValue(enumOrder,
-						escape(typePrefix + "notSet"))
-						.getBytes());
+		// Adding a default-value as "NOT_SET"
+		os(en.getNamespace()).write(marshaller.writeEnumValue(enumOrder, escape(typePrefix + "notSet")).getBytes());
 		enumOrder++;
 
 		if (itg.hasNext()) {
 			while (itg.hasNext()) {
-				os(en.getNamespace()).write(
-						marshaller.writeEnumValue(enumOrder,
-								escape(typePrefix + itg.next()))
-								.getBytes());
+				os(en.getNamespace()).write(marshaller.writeEnumValue(enumOrder, escape(typePrefix + itg.next())).getBytes());
 				enumOrder++;
 			}
 		} else {
-			os(en.getNamespace()).write(
-					marshaller.writeEnumValue(enumOrder,
-							escape(typePrefix + "UnspecifiedValue"))
-							.getBytes());
+			os(en.getNamespace()).write(marshaller.writeEnumValue(enumOrder, escape(typePrefix + "UnspecifiedValue")).getBytes());
 		}
 
 		os(en.getNamespace()).write(marshaller.writeEnumFooter().getBytes());
@@ -419,8 +403,7 @@ public class XSDParser implements ErrorHandler {
 
 		res = String.valueOf(nameChars);
 
-		if (!Character.isJavaIdentifierStart(nameChars[0])
-				|| keywords.contains(res)) {
+		if (!Character.isJavaIdentifierStart(nameChars[0]) || keywords.contains(res)) {
 			res = res + "Value";
 		}
 
@@ -468,7 +451,7 @@ public class XSDParser implements ErrorHandler {
 			if (child.getTerm().asModelGroupDecl() != null) {
 				XSModelGroupDecl xsModelGroupDecl = child.getTerm().asModelGroupDecl();
 				groupFields.addAll(processModelGroup(xsModelGroupDecl.getModelGroup(), xsset));
-			} else if(child.getTerm().asModelGroup() != null) {
+			} else if (child.getTerm().asModelGroup() != null) {
 				XSModelGroup xsModelGroup = child.getTerm().asModelGroup();
 				if (xsModelGroup.getCompositor().toString().equals("choice")) {
 					// TODO: define oneof here?
@@ -483,10 +466,12 @@ public class XSDParser implements ErrorHandler {
 						XSComplexType xsComplexType = term.getType().asComplexType();
 						String typeName = processComplexType(xsComplexType.asComplexType(), xsComplexType.getName(), xsset);
 
-						f = new Field(term.getName(), xsComplexType.getTargetNamespace(), typeName, child.isRepeated(), null, doc, child.getMinOccurs().intValue() > 0);
+						f = new Field(term.getName(), xsComplexType.getTargetNamespace(), typeName, child.isRepeated(), null, doc,
+								child.getMinOccurs().intValue() > 0);
 
 					} else {
-						f = new Field(term.getName(), term.getTargetNamespace(), term.getType().getName(), child.isRepeated(), null, doc, child.getMinOccurs().intValue() > 0);
+						f = new Field(term.getName(), term.getTargetNamespace(), term.getType().getName(), child.isRepeated(), null, doc,
+								child.getMinOccurs().intValue() > 0);
 					}
 
 					f.setDoc(resolveDocumentationAnnotation(term));
@@ -502,12 +487,10 @@ public class XSDParser implements ErrorHandler {
 		XSComplexType cType;
 		XSSimpleType xs;
 
-		if (el.getType() instanceof XSComplexType
-				&& el.getType() != sset.getAnyType()) {
+		if (el.getType() instanceof XSComplexType && el.getType() != sset.getAnyType()) {
 			cType = (XSComplexType) el.getType();
 			processComplexType(cType, el.getName(), sset);
-		} else if (el.getType() instanceof XSSimpleType
-				&& el.getType() != sset.getAnySimpleType()) {
+		} else if (el.getType() instanceof XSSimpleType && el.getType() != sset.getAnySimpleType()) {
 			xs = el.getType().asSimpleType();
 			processSimpleType(xs, el.getName());
 		}
@@ -527,18 +510,16 @@ public class XSDParser implements ErrorHandler {
 	 */
 	private String processSimpleType(XSSimpleType xs, String elementName) {
 
-		if(elementName != null && marshaller.getNameMapping(elementName) != null) {
+		if (elementName != null && marshaller.getNameMapping(elementName) != null) {
 			elementName = marshaller.getNameMapping(elementName);
 		}
 
-		
 		String typeName = xs.getName();
 		String namespace = xs.getTargetNamespace();
 
 		if (typeName == null) {
 			if (xs.getFacet("enumeration") != null) {
-				typeName = elementName != null ? elementName + "Type"
-						: generateAnonymousName();
+				typeName = elementName != null ? elementName + "Type" : generateAnonymousName();
 			} else {
 				// can't use elementName here as it might not be unique
 				// (test-range.xsd)
@@ -576,36 +557,33 @@ public class XSDParser implements ErrorHandler {
 	 * @param elementName
 	 * @param sset
 	 */
-	private String processComplexType(XSComplexType cType, String elementName,
-			XSSchemaSet sset) {
+	private String processComplexType(XSComplexType cType, String elementName, XSSchemaSet sset) {
 		Message st = null;
 		XSType parent;
 		String typeName = cType.getName();
 		String nameSpace = cType.getTargetNamespace();
 
-		if(elementName != null && marshaller.getNameMapping(elementName) != null) {
+		if (elementName != null && marshaller.getNameMapping(elementName) != null) {
 			elementName = marshaller.getNameMapping(elementName);
-		} else if (cType.getScope() != null){
-            elementName = cType.getScope().getName();
-        }
+		} else if (cType.getScope() != null) {
+			elementName = cType.getScope().getName();
+		}
 
 		if (typeName == null) {
-			typeName = elementName != null ? elementName + "Type"
-					: generateAnonymousName();
+			typeName = elementName != null ? elementName + "Type" : generateAnonymousName();
 		}
 		String doc = resolveDocumentationAnnotation(cType);
 
 		st = map.get(typeName);
 		if (st == null && !basicTypes.contains(typeName)) {
 
-			st = new Message(typeName,
-					NamespaceConverter.convertFromSchema(nameSpace));
+			st = new Message(typeName, NamespaceConverter.convertFromSchema(nameSpace));
 			st.setDoc(doc);
 
 			map.put(typeName, st);
 			if (cType.asComplexType() != null) {
-                processComplexType(cType, elementName, sset);
-            } else if (cType.getContentType() != null) {
+				processComplexType(cType, elementName, sset);
+			} else if (cType.getContentType() != null) {
 				if (cType.getContentType().asParticle() != null) {
 					XSParticle particle = cType.getContentType().asParticle();
 					if (particle.getTerm() != null && particle.getTerm().asModelGroup() != null) {
@@ -622,7 +600,8 @@ public class XSDParser implements ErrorHandler {
 					} else {
 						XSSimpleType primitiveType = xsSimpleType.getPrimitiveType();
 						if (primitiveType != null) {
-							st.addField(primitiveType.getName(), primitiveType.getTargetNamespace(), primitiveType.getName(), true, false, null, resolveDocumentationAnnotation(cType), xsdMapping);
+							st.addField(primitiveType.getName(), primitiveType.getTargetNamespace(), primitiveType.getName(), true, false, null,
+									resolveDocumentationAnnotation(cType), xsdMapping);
 						}
 					}
 				}
@@ -637,10 +616,11 @@ public class XSDParser implements ErrorHandler {
 					XSAttributeDecl decl = attr.getDecl();
 
 					if (decl.getType().getPrimitiveType() != null) {
-					    String fieldName = decl.getName();
+						String fieldName = decl.getName();
 
-					    if (decl.getType().isRestriction() && decl.getType().getFacet("enumeration") != null) {
-                        	st.addField(fieldName, createEnum(fieldName, decl.getTargetNamespace(), decl.getType().asRestriction()), false, false, null, null, xsdMapping);
+						if (decl.getType().isRestriction() && decl.getType().getFacet("enumeration") != null) {
+							st.addField(fieldName, createEnum(fieldName, decl.getTargetNamespace(), decl.getType().asRestriction()), false, false, null, null,
+									xsdMapping);
 						} else {
 							st.addField(fieldName, decl.getType().getPrimitiveType().getName(), false, false, null, null, xsdMapping);
 						}
@@ -657,7 +637,6 @@ public class XSDParser implements ErrorHandler {
 					if (parentMessage == null && ((ComplexTypeImpl) parent).getScope() != null) {
 						parentMessage = map.get(((ComplexTypeImpl) parent).getScope().getName());
 					}
-
 
 					if (parentMessage != null) {
 						List<Field> parentStructFields = parentMessage.getFields();
@@ -678,23 +657,22 @@ public class XSDParser implements ErrorHandler {
 	private String resolveDocumentationAnnotation(XSComponent xsComponent) {
 		String doc = null;
 		if (xsComponent.getAnnotation() != null && xsComponent.getAnnotation().getAnnotation() != null) {
-			if (xsComponent.getAnnotation().getAnnotation() instanceof Node){
+			if (xsComponent.getAnnotation().getAnnotation() instanceof Node) {
 				Node annotationEl = (Node) xsComponent.getAnnotation().getAnnotation();
-                NodeList annotations = annotationEl.getChildNodes();
+				NodeList annotations = annotationEl.getChildNodes();
 
-                for (int i = 0; i < annotations.getLength(); i++) {
-                    Node annotation = annotations.item(i);
-                    if ("documentation".equals(annotation.getLocalName())) {
+				for (int i = 0; i < annotations.getLength(); i++) {
+					Node annotation = annotations.item(i);
+					if ("documentation".equals(annotation.getLocalName())) {
 
-                        NodeList childNodes = annotation.getChildNodes();
-                        for (int j = 0; j < childNodes.getLength(); j++) {
-                            if (childNodes.item(j) != null &&
-                                    childNodes.item(j) instanceof Text) {
-                                doc = childNodes.item(j).getNodeValue();
-                            }
-                        }
-                    }
-                }
+						NodeList childNodes = annotation.getChildNodes();
+						for (int j = 0; j < childNodes.getLength(); j++) {
+							if (childNodes.item(j) != null && childNodes.item(j) instanceof Text) {
+								doc = childNodes.item(j).getNodeValue();
+							}
+						}
+					}
+				}
 			}
 		}
 		return doc;
@@ -752,8 +730,7 @@ public class XSDParser implements ErrorHandler {
 //		}
 //	}
 
-	private String createEnum(String typeName, String namespace,
-							  XSRestrictionSimpleType type) {
+	private String createEnum(String typeName, String namespace, XSRestrictionSimpleType type) {
 		Enumeration en;
 		Iterator<? extends XSFacet> it;
 
@@ -764,8 +741,7 @@ public class XSDParser implements ErrorHandler {
 				typeName += "Type";
 			}
 
-			en = new Enumeration(typeName,
-					NamespaceConverter.convertFromSchema(namespace));
+			en = new Enumeration(typeName, NamespaceConverter.convertFromSchema(namespace));
 			it = type.getDeclaredFacets().iterator();
 			while (it.hasNext()) {
 				en.addString(it.next().getValue().value);
@@ -902,22 +878,19 @@ public class XSDParser implements ErrorHandler {
 
 	@Override
 	public void error(SAXParseException exception) throws SAXException {
-		LOGGER.error(exception.getMessage() + " at "
-				+ exception.getSystemId());
+		LOGGER.error(exception.getMessage() + " at " + exception.getSystemId());
 		exception.printStackTrace();
 	}
 
 	@Override
 	public void fatalError(SAXParseException exception) throws SAXException {
-		LOGGER.error(exception.getMessage() + " at "
-				+ exception.getSystemId());
+		LOGGER.error(exception.getMessage() + " at " + exception.getSystemId());
 		exception.printStackTrace();
 	}
 
 	@Override
 	public void warning(SAXParseException exception) throws SAXException {
-		LOGGER.warn(exception.getMessage() + " at "
-				+ exception.getSystemId());
+		LOGGER.warn(exception.getMessage() + " at " + exception.getSystemId());
 		exception.printStackTrace();
 	}
 

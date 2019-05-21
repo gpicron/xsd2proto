@@ -45,14 +45,9 @@ public class Main {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
 	private static boolean correct;
-	private static String usage = "" 
-			+ "Usage: java xsd2proto-<VERSION>.jar [--output=FILENAME]\n"
-			+ "                           [--package=NAME] filename.xsd\n" 
-			+ "\n" 
-			+ "  --configFile=FILENAME           : path to configuration file\n"
-			+ "\nOR\n" 
-			+ "\n"
-			+ "  --filename=FILENAME             : store the result in FILENAME instead of standard output\n"
+	private static String usage = "" + "Usage: java xsd2proto-<VERSION>.jar [--output=FILENAME]\n"
+			+ "                           [--package=NAME] filename.xsd\n" + "\n" + "  --configFile=FILENAME           : path to configuration file\n"
+			+ "\nOR\n" + "\n" + "  --filename=FILENAME             : store the result in FILENAME instead of standard output\n"
 			+ "  --package=NAME                  : set namespace/package of the output file\n"
 			+ "  --nestEnums=true|false          : nest enum declaration within messages that reference them, only supported by protobuf, defaults to true\n"
 			+ "  --splitBySchema=true|false      : split output into namespace-specific files, defaults to false\n"
@@ -129,7 +124,7 @@ public class Main {
 
 					customTypeMappings = new LinkedHashMap<>();
 					if (config.customTypeMappings != null) {
-						for(Entry<String, String> kv : config.customTypeMappings.entrySet()) {
+						for (Entry<String, String> kv : config.customTypeMappings.entrySet()) {
 							Pattern p = Pattern.compile(kv.getKey());
 							customTypeMappings.put(p, kv.getValue());
 						}
@@ -137,7 +132,7 @@ public class Main {
 
 					customNameMappings = new LinkedHashMap<>();
 					if (config.customNameMappings != null) {
-						for(Entry<String, String> kv : config.customNameMappings.entrySet()) {
+						for (Entry<String, String> kv : config.customNameMappings.entrySet()) {
 							Pattern p = Pattern.compile(kv.getKey());
 							customNameMappings.put(p, kv.getValue());
 						}
@@ -153,7 +148,7 @@ public class Main {
 					LOGGER.error("Unable to find config file " + configFile, e);
 				} catch (YAMLException e) {
 					LOGGER.error("Error parsing config file", e);
-									
+
 				}
 			} else {
 				i = 0;

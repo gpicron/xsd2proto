@@ -14,7 +14,9 @@
 	<version>2.0-SNAPSHOT</version>
 
 	<properties>
+		<spotless.version>1.23.0</spotless.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
 		<junit.jupiter.version>5.4.2</junit.jupiter.version>
@@ -110,7 +112,33 @@
 
 	<build>
 		<plugins>
-
+			<plugin>
+				<groupId>com.diffplug.spotless</groupId>
+				<artifactId>spotless-maven-plugin</artifactId>
+				<version>${spotless.version}</version>
+				<configuration>
+					<java>
+						<eclipse>
+							<file>src/test/resources/codestyle/jdt_codestyle.xml</file>
+							<version>4.9.0</version>
+						</eclipse>
+						<removeUnusedImports />
+						<importOrder>
+							<file>src/test/resources/codestyle/jdt.importorder</file>
+						</importOrder>
+					</java>
+				</configuration>
+				<executions>
+					<execution>
+						<id>codestyle_check</id>
+						<phase>initialize</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
