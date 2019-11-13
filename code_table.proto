@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package common;
+
+import "validate/validate.proto";
+
+message CatalogEntry
+{
+  int32 code = 1 [(validate.rules).int32 = {gte: 0, lte: 9999}];
+  int32 version = 1 [(validate.rules).int32 = {gte: 0, lte: 99}];
+}
+
+message EnumerationEntry
+{
+  int32 code = 1 [(validate.rules).int32 = {gte: 0, lte: 9999}];
+}
+
+enum CT01_CountryType
+{
+
+}

@@ -1,3 +1,8 @@
-# XSD2PROTO DEPRECATED
+# XSD2PROTO 
 
-Replaced by https://github.com/entur/schema2proto
+protoc \
+  -I . \
+  -I ${GOPATH}/src \
+  -I ${GOPATH}/src/github.com/envoyproxy/protoc-gen-validate \
+  --java_out=":./generated" \
+  --validate_out="lang=java:./generated" \

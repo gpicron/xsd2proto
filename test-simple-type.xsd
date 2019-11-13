@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- edited by Piotr Danowski & Wojciech Partyka -->
+<xs:schema xmlns="http://www.europa.eu/schengen/ees/xsd/v1" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:vdtc="http://www.europa.eu/schengen/vis/xsd/v2/types/Common" xmlns:vdta="http://www.europa.eu/schengen/vis/xsd/v2/types/Application" targetNamespace="http://www.europa.eu/schengen/ees/xsd/v1">
+    <xs:simpleType name="EnumerationEntryRD">
+        <xs:annotation>
+            <xs:documentation>Description: Format for the catalog entry of the code table.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:length value="4"/>
+            <xs:pattern value="\d{4}"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="STXX4_OperationVariantType">
+        <xs:restriction base="EnumerationEntryRD"/>
+    </xs:simpleType>
+    <xs:complexType name="HeaderBaseType" abstract="true">
+        <xs:annotation>
+            <xs:documentation>The date of expiry of the validity of the travel document or documents.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="Request">
+                <xs:complexType>
+                <xs:sequence>
+                    <xs:element name="aa" type="xs:string"/>
+                    <xs:element name="bb" type="xs:int"/>
+                </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+            <xs:element name="Variant" type="STXX4_OperationVariantType"/>
+            <xs:element name="MessageID">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="255"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="TestID" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="255"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

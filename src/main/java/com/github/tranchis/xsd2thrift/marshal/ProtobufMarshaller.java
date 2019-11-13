@@ -23,15 +23,19 @@
  */
 package com.github.tranchis.xsd2thrift.marshal;
 
+import com.github.tranchis.xsd2thrift.NamespaceConverter;
+import com.google.common.base.CaseFormat;
+import com.sun.xml.xsom.XSFacet;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.github.tranchis.xsd2thrift.Field;
-import com.github.tranchis.xsd2thrift.NamespaceConverter;
-import com.google.common.base.CaseFormat;
+import java.util.stream.Collectors;
 
 public class ProtobufMarshaller {
 	private HashMap<Pattern, String> typeMapping;
@@ -74,7 +78,7 @@ public class ProtobufMarshaller {
 		typeMapping.put(Pattern.compile("^byte$"), "bytes");
 		typeMapping.put(Pattern.compile("^date$"), "int32"); // Number of days since January 1st),
 		// 1970
-		typeMapping.put(Pattern.compile("^dateTime$"), "int64"); // Number of milliseconds since
+		typeMapping.put(Pattern.compile("^dateTime$"), "google.protobuf.Timestamp"); // Number of milliseconds since
 		// January 1st), 1970
 
 		typeMapping.put(Pattern.compile("^time$"), "google.protobuf.Timestamp");
@@ -117,6 +121,8 @@ public class ProtobufMarshaller {
 			}
 		}
 
+		b.append("import \"validate/validate.proto\";\n\n");
+
 		return b.toString();
 	}
 
@@ -143,23 +149,31 @@ public class ProtobufMarshaller {
 	}
 
 	public String writeStructHeader(String name) {
-		final String result = writeIndent() + "message " + name + "\n{\n";
+		final String result = writeIndent() + "message " + name + "\n" + writeIndent() + "{\n";
 		increaseIndent();
 		return result;
 	}
 
 	public String writeStructParameter(int order, boolean required, boolean repeated, String name, String type, String fieldDocumentation,
-			boolean splitByNamespace) {
+									   boolean splitByNamespace, List<XSFacet> facets) {
 		String sRequired = "";
 
 		if (fieldDocumentation != null) {
-			fieldDocumentation = fieldDocumentation.replaceAll("\n", " ").replaceAll("\t", " ");
+			fieldDocumentation = fieldDocumentation.replaceAll("[\n\r\t\\s]+", " ").trim();
 		}
+
 
 		if (repeated) {
 			sRequired = "repeated ";
 		}
+		if (StringUtils.isAllUpperCase(name)) {
+			name = StringUtils.lowerCase(name);
+		}
+
 		String fieldName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name);
+		fieldName = fieldName.replaceAll("_i_d", "_id");
+		fieldName = fieldName.replaceAll("_m_s", "_ms");
+
 
 		String convertedType = NamespaceConverter.convertFromSchema(type);
 
@@ -169,19 +183,90 @@ public class ProtobufMarshaller {
 			convertedType = convertedType.substring(convertedType.lastIndexOf(".") + 1);
 		}
 
-		return writeIndent() + sRequired + convertedType + " " + fieldName + " = " + order + ";"
-				+ (fieldDocumentation != null ? " // " + fieldDocumentation : "") + "\n";
+		String validation =  "";
+		if (facets  != null && facets.size() > 0) {
+			LinkedHashMap<String,XSFacet> consolidated = new LinkedHashMap<>();
+			for (XSFacet facet : facets) {
+				XSFacet previous = consolidated.get(facet.getName());
+				if (previous != null) {
+					switch (facet.getName()) {
+						case "maxLength":
+							if (Integer.valueOf(facet.getValue().value) < Integer.valueOf(previous.getValue().value)) {
+								consolidated.put(facet.getName(), facet);
+							}
+							break;
+						case "minLength":
+							if (Integer.valueOf(facet.getValue().value) > Integer.valueOf(previous.getValue().value)) {
+								consolidated.put(facet.getName(), facet);
+							}
+							break;
+					}
+				} else {
+					consolidated.put(facet.getName(), facet);
+				}
+			}
+
+			validation = " [(validate.rules)." + ((repeated) ? "repeated.items." : "") + type + " = {";
+			validation += consolidated.values().stream()
+					.map(f -> {
+						switch (f.getName()) {
+							case "length":
+								return "len: " + f.getValue();
+							case "pattern":
+								return "pattern: \"" + f.getValue().toString().replaceAll("\\\\","\\\\\\\\") + "\"";
+							case "maxLength":
+								return "max_len: " + f.getValue();
+							case "minLength":
+								return "min_len: " + f.getValue();
+							case "totalDigits":
+								int digits = Integer.parseInt(f.getValue().value);
+								switch (type) {
+									case "int64":
+										return "gte: -" + StringUtils.repeat('9', digits) + ",lte: " + StringUtils.repeat('9', digits);
+									default:
+										throw new UnsupportedOperationException("not yet supported " + f + " on " + type);
+								}
+							case "minInclusive":
+								switch (type) {
+									case "int64":
+										int value = Integer.parseInt(f.getValue().value);
+										return "gte: " + value;
+									default:
+										throw new UnsupportedOperationException("not yet supported " + f + " on " + type);
+								}
+							case "maxInclusive":
+								switch (type) {
+									case "int64":
+										int value = Integer.parseInt(f.getValue().value);
+										return "lte: " + value;
+									default:
+										throw new UnsupportedOperationException("not yet supported " + f + " on " + type);
+								}
+							default:
+								throw new UnsupportedOperationException("not yet supported" + f);
+						}
+
+					}).collect(Collectors.joining(", "));
+			validation += "}]";
+		}
+
+		if (StringUtils.isNotBlank(validation)) {
+			validation = "\t\t" + validation;
+		}
+
+		return writeIndent() + sRequired + convertedType + " " + fieldName + " = " + order + validation + ";"
+				+ (StringUtils.isNotBlank(fieldDocumentation) ? " // " + fieldDocumentation : "") + "\n";
 	}
 
 	public String writeStructFooter() {
 		decreaseIndent();
-		return writeIndent() + "}\n\n";
+		return writeIndent() + "}\n";
 	}
 
 	public String getTypeMapping(String type) {
 		for (Pattern p : typeMapping.keySet()) {
 			Matcher m = p.matcher(type);
-			if (m.find()) {
+			if (m.matches()) {
 				return m.replaceAll(typeMapping.get(p));
 			}
 		}
@@ -192,7 +277,7 @@ public class ProtobufMarshaller {
 	public String getNameMapping(String type) {
 		for (Pattern p : nameMapping.keySet()) {
 			Matcher m = p.matcher(type);
-			if (m.find()) {
+			if (m.matches()) {
 				return m.replaceAll(nameMapping.get(p));
 			}
 		}
@@ -255,18 +340,11 @@ public class ProtobufMarshaller {
 		return null;
 	}
 
-	public String getImport(Field field) {
-		if (imports != null) {
-			String nsPrefix = "";
-			if (field.getTypeNamespace() != null) {
-				nsPrefix = field.getTypeNamespace() + ".";
-			}
-			return imports.get(nsPrefix + field.getType());
-		}
-		return null;
-	}
-
 	public void setOptions(Map<String, Object> options) {
 		this.options = options;
+	}
+
+	public void setCustomImports(Map<String, String> customImports) {
+		this.imports.putAll(customImports);
 	}
 }

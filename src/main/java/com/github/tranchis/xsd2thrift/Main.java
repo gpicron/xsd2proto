@@ -23,6 +23,12 @@
  */
 package com.github.tranchis.xsd2thrift;
 
+import com.github.tranchis.xsd2thrift.marshal.ProtobufMarshaller;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.error.YAMLException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -32,13 +38,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.error.YAMLException;
-
-import com.github.tranchis.xsd2thrift.marshal.ProtobufMarshaller;
 
 public class Main {
 
@@ -108,6 +107,7 @@ public class Main {
 
 			Map<Pattern, String> customTypeMappings = null;
 			Map<Pattern, String> customNameMappings = null;
+			Map<String, String> customImports = null;
 			Map<String, Object> options = null;
 
 			if (args.length == 2 && args[0].startsWith("--configFile=")) {
@@ -136,6 +136,10 @@ public class Main {
 							Pattern p = Pattern.compile(kv.getKey());
 							customNameMappings.put(p, kv.getValue());
 						}
+					}
+					customImports = new LinkedHashMap<>();
+					if (config.customImports != null) {
+						customImports.putAll(config.customImports);
 					}
 					options = config.options;
 					xp.setNestEnums(config.nestEnums);
@@ -187,6 +191,17 @@ public class Main {
 								usage(mapping + " is not a valid custom name mapping - use originalname:newname");
 							}
 						}
+					} else if (args[i].startsWith("--customImports=")) {
+						param = args[i].split("=")[1];
+						customImports = new LinkedHashMap<String, String>();
+						for (String mapping : param.split(",")) {
+							int colon = mapping.indexOf(':');
+							if (colon > -1) {
+								customImports.put(mapping.substring(0, colon), mapping.substring(colon + 1));
+							} else {
+								usage(mapping + " is not a valid custom name mapping - use originalname:newname");
+							}
+						}
 					} else if (args[i].startsWith("--nestEnums=")) {
 						param = args[i].split("=")[1];
 						boolean nestEnums = Boolean.valueOf(param);
@@ -211,6 +226,10 @@ public class Main {
 			if (customNameMappings != null) {
 				pbm.setCustomNameMappings(customNameMappings);
 			}
+			if (customImports != null) {
+				pbm.setCustomImports(customImports);
+			}
+
 			if (options != null) {
 				pbm.setOptions(options);
 			}

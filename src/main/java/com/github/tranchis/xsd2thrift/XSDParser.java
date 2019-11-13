@@ -23,34 +23,35 @@
  */
 package com.github.tranchis.xsd2thrift;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.*;
-
-import javax.xml.parsers.SAXParserFactory;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
-import org.xml.sax.*;
-
 import com.github.tranchis.xsd2thrift.marshal.ProtobufMarshaller;
 import com.sun.xml.xsom.*;
 import com.sun.xml.xsom.impl.ComplexTypeImpl;
 import com.sun.xml.xsom.parser.XSOMParser;
 import com.sun.xml.xsom.util.DomAnnotationParserFactory;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+
+import javax.xml.parsers.SAXParserFactory;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.*;
 
 public class XSDParser implements ErrorHandler {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(XSDParser.class);
 
 	private File f;
-	private TreeMap<String, Message> map;
-	private Map<String, Enumeration> enums;
-	private Map<String, String> simpleTypes;
+	private LinkedHashMap<String, Message> map;
+	private LinkedHashMap<String, Enumeration> enums;
+	private LinkedHashMap<String, SimpleTypeDesc> simpleTypes;
 	private Map<String, String> documentation;
 	private Set<String> keywords, basicTypes;
 	private HashMap<String, String> xsdMapping;
@@ -70,11 +71,11 @@ public class XSDParser implements ErrorHandler {
 	private void init(String stFile) {
 
 		this.f = new File(stFile);
-		map = new TreeMap<String, Message>();
-		enums = new HashMap<String, Enumeration>();
-		simpleTypes = new HashMap<String, String>();
-		documentation = new HashMap<String, String>();
-		keywords = new TreeSet<String>();
+		map = new LinkedHashMap<>();
+		enums = new LinkedHashMap<>();
+		simpleTypes = new LinkedHashMap<>();
+		documentation = new HashMap<>();
+		keywords = new TreeSet<>();
 		keywords.add("interface");
 		keywords.add("is");
 		keywords.add("class");
@@ -178,15 +179,10 @@ public class XSDParser implements ErrorHandler {
 		declared.addAll(simpleTypes.keySet());
 
 		bModified = true;
-		while (bModified && !messageSet.isEmpty()) {
-			bModified = false;
-			messageIterator = map.values().iterator();
-			while (messageIterator.hasNext()) {
-				message = messageIterator.next();
-				writeMessage(message, declared);
-				messageSet.remove(message);
-				bModified = true;
-			}
+		while (!messageSet.isEmpty()) {
+			message = ((TreeSet<Message>) messageSet).first();
+			writeMessage(message, declared, "");
+			messageSet.removeIf(m -> declared.contains(m.getName()));
 		}
 
 		if (!messageSet.isEmpty()) {
@@ -204,7 +200,7 @@ public class XSDParser implements ErrorHandler {
 				if (marshaller.isCircularDependencySupported()) {
 					// Just dump the rest
 					for (Message s : messageSet) {
-						writeMessage(s, declared);
+						writeMessage(s, declared, "");
 					}
 				} else {
 					// Report circular dependency
@@ -230,7 +226,7 @@ public class XSDParser implements ErrorHandler {
 		}
 	}
 
-	private void writeMessage(Message message, Set<String> declared) throws IOException {
+	private void writeMessage(Message message, Set<String> declared, String messageSubScope) throws IOException {
 		Iterator<Field> itf;
 		Field field;
 		String fieldName, fieldType;
@@ -245,10 +241,11 @@ public class XSDParser implements ErrorHandler {
 			messageName = marshaller.getNameMapping(messageName);
 		}
 
-		os(message.getNamespace()).write(marshaller.writeStructHeader(escape(messageName)).getBytes());
+		os(message.getNamespace()).write(marshaller.writeStructHeader(escape(messageName.substring(messageSubScope.length()))).getBytes());
 
-		itf = orderedIteratorForFields(message.getFields());
+		itf = message.getFields().iterator();
 		usedInEnums = new TreeSet<String>();
+		LinkedHashSet<Message> subMessages = new LinkedHashSet<>();
 		order = 1;
 		while (itf.hasNext()) {
 			field = itf.next();
@@ -266,20 +263,11 @@ public class XSDParser implements ErrorHandler {
 				writeEnum(fieldType);
 			}
 
-			if (simpleTypes.containsKey(fieldType)) {
-				fieldType = simpleTypes.get(fieldType);
-			}
-
-			if (!map.keySet().contains(fieldType) && !basicTypes.contains(fieldType) && !enums.containsKey(fieldType)) {
-				fieldType = "binary";
-			}
-			if (fieldType.equals(fieldName)) {
-				fieldName = "_" + fieldName;
-			}
-
+			boolean customTypeMapping = false;
 			String typeNameSpace = "";
 			if (marshaller.getTypeMapping(fieldType) != null) {
 				fieldType = marshaller.getTypeMapping(fieldType);
+				customTypeMapping = true;
 				int qualifyingDot = fieldType.lastIndexOf('.');
 				if (qualifyingDot > -1) {
 					typeNameSpace = fieldType.substring(0, qualifyingDot + 1);
@@ -297,37 +285,88 @@ public class XSDParser implements ErrorHandler {
 				writer.addInclusion(message.getNamespace(), field.getTypeNamespace());
 			}
 
-			if (marshaller.getTypeMapping(fieldType) != null) {
-				// Message-type has been overridden, need to override all usage
-				fieldType = marshaller.getTypeMapping(fieldType);
+			SimpleTypeDesc specialisedSimpleFieldType = null;
+			if (!customTypeMapping) {
+
+				if (simpleTypes.containsKey(fieldType)) {
+					specialisedSimpleFieldType = simpleTypes.get(fieldType);
+					fieldType = specialisedSimpleFieldType.getBaseType();
+				}
+
+				if (!map.keySet().contains(fieldType) && !basicTypes.contains(fieldType) && !enums.containsKey(fieldType)) {
+					fieldType = "binary";
+				}
+
+
+				if (marshaller.getTypeMapping(fieldType) != null) {
+					// Message-type has been overridden, need to override all usage
+					fieldType = marshaller.getTypeMapping(fieldType);
+				}
 			}
 
-			fieldType = typeNameSpace + escapeType(fieldType);
-
-			String doc = null;
-			if (map.get(fieldType) != null) {
-				doc = map.get(fieldType).getDoc();
+			if (fieldType.equals(fieldName)) {
+				fieldName = "_" + fieldName;
 			}
+
+			String doc = field.getDoc();
+			if (doc == null) {
+				doc = "";
+			}
+
+			// nested type
+			Message subMessage = map.get(fieldType);
+			if (fieldType.startsWith(messageName) && !declared.contains(fieldType)) {
+				subMessages.add(subMessage);
+				fieldType = fieldType.substring(messageName.length());
+			} else {
+				fieldType = typeNameSpace + escapeType(fieldType);
+
+
+				if (specialisedSimpleFieldType != null) {
+					if (StringUtils.isNotBlank(doc)) {
+						doc += " | ";
+					}
+
+					if (!specialisedSimpleFieldType.getName().startsWith("Anonymous")) {
+						doc += "XSD type: " + specialisedSimpleFieldType.getName();
+					}
+					if (specialisedSimpleFieldType.getDocumentation() != null) {
+						doc += " | " + specialisedSimpleFieldType.getDocumentation();
+					}
+				}
+			}
+
+
 
 			os(message.getNamespace())
-					.write(marshaller.writeStructParameter(order, field.isRequired(), field.isRepeat(), escape(fieldName), fieldType, doc, writer.isSplitBySchema()).getBytes());
+					.write(marshaller.writeStructParameter(order, field.isRequired(), field.isRepeat(), escape(fieldName), fieldType, doc, writer.isSplitBySchema(),
+							(specialisedSimpleFieldType != null) ? specialisedSimpleFieldType.getFacets() : null).getBytes());
+
+
 			order = order + 1;
 		}
+
+		for (Message subMessage : subMessages) {
+			writeMessage(subMessage, declared, messageName + '.');
+		}
+
 		os(message.getNamespace()).write(marshaller.writeStructFooter().getBytes());
 		declared.add(message.getName());
 	}
 
 	private void writeMessageDocumentation(String doc, String namespace) throws IOException {
+		StringBuilder sb = new StringBuilder();
 		if (includeMessageDocs && doc != null) {
-			StringBuilder sb = new StringBuilder();
 			sb.append("\n/*\n");
 			// Handling possible multiline-comments
 			sb.append(" * ");
 			sb.append(doc.trim().replaceAll("\n", "\n * "));
 			sb.append("\n */\n");
 
-			os(namespace).write(sb.toString().getBytes());
+		} else {
+			sb.append("\n");
 		}
+		os(namespace).write(sb.toString().getBytes());
 	}
 
 	private Iterator<Field> orderedIteratorForFields(List<Field> fields) {
@@ -424,7 +463,7 @@ public class XSDParser implements ErrorHandler {
 				while (xsModelGroupDeclIterator.hasNext()) {
 					XSModelGroupDecl modelGroupDecl = xsModelGroupDeclIterator.next();
 					XSModelGroup modelGroup = modelGroupDecl.getModelGroup();
-					processModelGroup(modelGroup, xs.getRoot());
+					processModelGroup(modelGroup, null, xs.getRoot());
 				}
 				itt = xs.iterateElementDecls();
 				while (itt.hasNext()) {
@@ -433,7 +472,7 @@ public class XSDParser implements ErrorHandler {
 				}
 				final Iterator<XSComplexType> ict = xs.iterateComplexTypes();
 				while (ict.hasNext()) {
-					processComplexType(ict.next(), null, sset);
+					processComplexType(ict.next(), null, null, sset);
 				}
 				final Iterator<XSSimpleType> ist = xs.iterateSimpleTypes();
 				while (ist.hasNext()) {
@@ -443,38 +482,46 @@ public class XSDParser implements ErrorHandler {
 		}
 	}
 
-	private List<Field> processModelGroup(XSModelGroup modelGroup, XSSchemaSet xsset) {
+	private List<Field> processModelGroup(XSModelGroup modelGroup, String ownerTypeName, XSSchemaSet xsset) {
 
 		List<Field> groupFields = new ArrayList<>();
 
 		for (XSParticle child : modelGroup.getChildren()) {
 			if (child.getTerm().asModelGroupDecl() != null) {
 				XSModelGroupDecl xsModelGroupDecl = child.getTerm().asModelGroupDecl();
-				groupFields.addAll(processModelGroup(xsModelGroupDecl.getModelGroup(), xsset));
+				groupFields.addAll(processModelGroup(xsModelGroupDecl.getModelGroup(), ownerTypeName, xsset));
 			} else if (child.getTerm().asModelGroup() != null) {
 				XSModelGroup xsModelGroup = child.getTerm().asModelGroup();
 				if (xsModelGroup.getCompositor().toString().equals("choice")) {
 					// TODO: define oneof here?
 				}
-				groupFields.addAll(processModelGroup(xsModelGroup, xsset));
+				groupFields.addAll(processModelGroup(xsModelGroup, ownerTypeName, xsset));
 			} else {
 				XSElementDecl term = child.getTerm().asElementDecl();
 				if (term != null) {
 					Field f;
 					String doc = resolveDocumentationAnnotation(term);
-					if (term.getType() != null && term.getType().asComplexType() != null) {
-						XSComplexType xsComplexType = term.getType().asComplexType();
-						String typeName = processComplexType(xsComplexType.asComplexType(), xsComplexType.getName(), xsset);
+					XSType type = term.getType();
+
+					if (type != null && type.asComplexType() != null) {
+						XSComplexType xsComplexType = type.asComplexType();
+						String typeName = processComplexType(xsComplexType.asComplexType(), xsComplexType.getName(), ownerTypeName, xsset);
 
 						f = new Field(term.getName(), xsComplexType.getTargetNamespace(), typeName, child.isRepeated(), null, doc,
 								child.getMinOccurs().intValue() > 0);
+					} else if (type != null && type.isSimpleType() && type.getName() == null) {
+						XSSimpleType xsSimpleType = type.asSimpleType();
+						String typeName = processSimpleType(xsSimpleType, term.getName());
 
+						f = new Field(term.getName(), term.getTargetNamespace(), typeName, child.isRepeated(), null, doc,
+								child.getMinOccurs().intValue() > 0);
 					} else {
-						f = new Field(term.getName(), term.getTargetNamespace(), term.getType().getName(), child.isRepeated(), null, doc,
+
+						f = new Field(term.getName(), term.getTargetNamespace(), type.getName(), child.isRepeated(), null, doc,
 								child.getMinOccurs().intValue() > 0);
 					}
 
-					f.setDoc(resolveDocumentationAnnotation(term));
+
 					groupFields.add(f);
 				}
 			}
@@ -489,18 +536,10 @@ public class XSDParser implements ErrorHandler {
 
 		if (el.getType() instanceof XSComplexType && el.getType() != sset.getAnyType()) {
 			cType = (XSComplexType) el.getType();
-			processComplexType(cType, el.getName(), sset);
+			processComplexType(cType, el.getName(), null, sset);
 		} else if (el.getType() instanceof XSSimpleType && el.getType() != sset.getAnySimpleType()) {
 			xs = el.getType().asSimpleType();
 			processSimpleType(xs, el.getName());
-		}
-	}
-
-	private String processType(XSType type, String elementName, XSSchemaSet sset) {
-		if (type instanceof XSComplexType) {
-			return processComplexType(type.asComplexType(), elementName, sset);
-		} else {
-			return processSimpleType(type.asSimpleType(), elementName);
 		}
 	}
 
@@ -532,15 +571,25 @@ public class XSDParser implements ErrorHandler {
 		} else {
 			// This is just a restriction on a basic type, find parent and map
 			// it to the type
+			String doc = resolveDocumentationAnnotation(xs);
 			String baseTypeName = typeName;
+			List<XSFacet> facets = new ArrayList<>();
 			while (xs != null && !basicTypes.contains(baseTypeName)) {
+				if (xs.isRestriction()) {
+					facets.addAll(((XSRestrictionSimpleType)xs).getDeclaredFacets());
+				}
 				xs = xs.getBaseType().asSimpleType();
+
 				if (xs != null) {
 					baseTypeName = xs.getName();
 				}
 			}
-			simpleTypes.put(typeName, xs != null ? xs.getName() : "string");
-			String doc = resolveDocumentationAnnotation(xs);
+			SimpleTypeDesc  desc = new SimpleTypeDesc(typeName, xs != null ? xs.getName() : "string");
+			desc.setDocumentation(doc);
+			desc.setFacets(facets);
+
+			simpleTypes.put(typeName, desc);
+
 			addDocumentation(typeName, doc);
 		}
 		return typeName;
@@ -557,7 +606,7 @@ public class XSDParser implements ErrorHandler {
 	 * @param elementName
 	 * @param sset
 	 */
-	private String processComplexType(XSComplexType cType, String elementName, XSSchemaSet sset) {
+	private String processComplexType(XSComplexType cType, String elementName, String elementOwnerType, XSSchemaSet sset) {
 		Message st = null;
 		XSType parent;
 		String typeName = cType.getName();
@@ -570,7 +619,7 @@ public class XSDParser implements ErrorHandler {
 		}
 
 		if (typeName == null) {
-			typeName = elementName != null ? elementName + "Type" : generateAnonymousName();
+			typeName = elementName != null ? ((elementOwnerType != null) ? elementOwnerType + "." : "") + elementName + "Type" : generateAnonymousName();
 		}
 		String doc = resolveDocumentationAnnotation(cType);
 
@@ -581,16 +630,17 @@ public class XSDParser implements ErrorHandler {
 			st.setDoc(doc);
 
 			map.put(typeName, st);
-			if (cType.asComplexType() != null) {
-				processComplexType(cType, elementName, sset);
+			XSComplexType asCtype = cType.asComplexType();
+			if (cType.asComplexType() != null && cType != asCtype) {
+				processComplexType(asCtype, elementName, typeName, sset);
 			} else if (cType.getContentType() != null) {
 				if (cType.getContentType().asParticle() != null) {
 					XSParticle particle = cType.getContentType().asParticle();
 					if (particle.getTerm() != null && particle.getTerm().asModelGroup() != null) {
-						List<Field> fields = processModelGroup(particle.getTerm().asModelGroup(), sset);
+						List<Field> fields = processModelGroup(particle.getTerm().asModelGroup(), typeName, sset);
 						st.addFields(fields, xsdMapping);
 					} else if (particle.getTerm() != null && particle.getTerm().asModelGroupDecl() != null) {
-						List<Field> fields = processModelGroup(particle.getTerm().asModelGroupDecl().getModelGroup(), sset);
+						List<Field> fields = processModelGroup(particle.getTerm().asModelGroupDecl().getModelGroup(), typeName, sset);
 						st.addFields(fields, xsdMapping);
 					}
 				} else if (cType.getContentType().asSimpleType() != null) {
